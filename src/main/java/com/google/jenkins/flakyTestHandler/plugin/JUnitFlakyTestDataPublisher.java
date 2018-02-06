@@ -48,10 +48,9 @@ public class JUnitFlakyTestDataPublisher
   @Override
   public TestResultAction.Data contributeTestData(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, TestResult testResult)
       throws IOException, InterruptedException {
-    AbstractBuild<?,?> abstractBuild = (AbstractBuild) run;
     FlakyTestResult flakyTestResult = launcher.getChannel().call(new FlakyTestResultCollector(testResult));
     // TODO consider the possibility that there is >1 such action
-    flakyTestResult.freeze(abstractBuild.getAction(AbstractTestResultAction.class), abstractBuild);
+    flakyTestResult.freeze(run.getAction(AbstractTestResultAction.class), run);
     return new JUnitFlakyTestData(flakyTestResult);
   }
 
