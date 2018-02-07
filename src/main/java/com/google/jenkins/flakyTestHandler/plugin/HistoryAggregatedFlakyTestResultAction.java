@@ -109,7 +109,7 @@ public class HistoryAggregatedFlakyTestResultAction implements Action {
    *
    * @param build the build to be aggregated
    */
-  public void aggregateOneBuild(AbstractBuild<?, ?> build) {
+  public void aggregateOneBuild(Run<?, ?> build) {
     FlakyTestResultAction action = build.getAction(FlakyTestResultAction.class);
     if (action == null) {
       return;
