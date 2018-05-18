@@ -41,6 +41,7 @@ import hudson.model.BooleanParameterValue;
 import hudson.model.CauseAction;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
+import hudson.model.Queue;
 import hudson.model.StringParameterValue;
 import jenkins.model.Jenkins;
 
@@ -152,8 +153,8 @@ public class DeflakeAction implements Action {
         originalParamAction = new ParametersAction();
       }
       actions.add(originalParamAction.createUpdated(parameterValues));
-      Jenkins.getInstance().getQueue().schedule2(currentBuild.getProject(), 0,
-          actions);
+
+      Jenkins.getInstance().getQueue().schedule((Queue.Task) currentBuild.getParent(), 0, actions);
     }
 
     response.sendRedirect("../../");
