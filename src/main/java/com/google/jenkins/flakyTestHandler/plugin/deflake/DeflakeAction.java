@@ -19,6 +19,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction;
 
+import hudson.model.Job;
+import hudson.model.Run;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -34,7 +36,6 @@ import java.util.logging.Level;
 
 import javax.servlet.ServletException;
 
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BooleanParameterValue;
@@ -107,14 +108,14 @@ public class DeflakeAction implements Action {
    */
   public void doIndex(StaplerRequest request, StaplerResponse response) throws
       IOException, ServletException, InterruptedException {
-    AbstractBuild currentBuild = request.findAncestorObject(AbstractBuild.class);
+    Run currentBuild = request.findAncestorObject(Run.class);
     if (currentBuild != null) {
 
-      AbstractProject project = currentBuild.getProject();
-      if (project == null) {
+      Job job = currentBuild.getParent();
+      if (job == null) {
         return;
       }
-      project.checkPermission(AbstractProject.BUILD);
+      job.checkPermission(AbstractProject.BUILD);
       response.sendRedirect(DEFLAKE_CONFIG_URL);
     }
   }
@@ -125,14 +126,14 @@ public class DeflakeAction implements Action {
   public void doSubmitDeflakeRequest(StaplerRequest request, StaplerResponse response) throws
       IOException, ServletException, InterruptedException {
 
-    AbstractBuild currentBuild = request.findAncestorObject(AbstractBuild.class);
+    Run currentBuild = request.findAncestorObject(Run.class);
     if (currentBuild != null) {
-      AbstractProject project = currentBuild.getProject();
-      if (project == null) {
+      Job job = currentBuild.getParent();
+      if (job == null) {
         response.sendRedirect("../../");
         return;
       }
-      project.checkPermission(AbstractProject.BUILD);
+      job.checkPermission(AbstractProject.BUILD);
       List<Action> actions = constructDeflakeCause(currentBuild);
 
       JSONObject formData = request.getSubmittedForm();
@@ -178,7 +179,7 @@ public class DeflakeAction implements Action {
    * @return list with all original causes and a {@link hudson.model.Cause.UserIdCause} and a {@link
    * com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause}.
    */
-  private static List<Action> constructDeflakeCause(AbstractBuild up) {
+  private static List<Action> constructDeflakeCause(Run up) {
     List<Action> actions = new ArrayList<Action>();
     actions.add(new CauseAction(new DeflakeCause(up)));
     return actions;

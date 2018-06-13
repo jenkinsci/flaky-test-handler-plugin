@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
