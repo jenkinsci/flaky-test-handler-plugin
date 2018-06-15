@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hudson.Extension;
+import hudson.model.Action;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -49,21 +50,21 @@ public class DeflakeListener extends RunListener<Run> {
 
   // Add deflake action to the build and aggregate test running stats from this build
   @Override
-  public void onCompleted(Run build, TaskListener listener) {
+  public void onCompleted(Run run, TaskListener listener) {
     // TODO consider the possibility that there is >1 such action
-    TestResultAction testResultAction = build.getAction(TestResultAction.class);
+    TestResultAction testResultAction = run.getAction(TestResultAction.class);
 
-    HistoryAggregatedFlakyTestResultAction historyAction = build.getParent()
+    HistoryAggregatedFlakyTestResultAction historyAction = run.getParent()
         .getAction(HistoryAggregatedFlakyTestResultAction.class);
 
     // Aggregate test running results
     if (historyAction != null) {
-      historyAction.aggregateOneBuild(build);
+      historyAction.aggregateOneBuild(run);
     }
 
     if (testResultAction != null && testResultAction.getFailCount() > 0) {
       // Only add deflake action if there are test failures
-      build.addAction(
+      run.addAction(
           new DeflakeAction(getFailingTestClassMethodMap(testResultAction.getFailedTests())));
     }
   }
