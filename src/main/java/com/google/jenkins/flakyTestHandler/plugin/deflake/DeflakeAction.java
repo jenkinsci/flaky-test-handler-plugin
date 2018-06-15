@@ -126,15 +126,15 @@ public class DeflakeAction implements Action {
   public void doSubmitDeflakeRequest(StaplerRequest request, StaplerResponse response) throws
       IOException, ServletException, InterruptedException {
 
-    Run currentBuild = request.findAncestorObject(Run.class);
-    if (currentBuild != null) {
-      Job job = currentBuild.getParent();
+    Run run = request.findAncestorObject(Run.class);
+    if (run != null) {
+      Job job = run.getParent();
       if (job == null) {
         response.sendRedirect("../../");
         return;
       }
       job.checkPermission(AbstractProject.BUILD);
-      List<Action> actions = constructDeflakeCause(currentBuild);
+      List<Action> actions = constructDeflakeCause(run);
 
       JSONObject formData = request.getSubmittedForm();
       List<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
@@ -149,13 +149,14 @@ public class DeflakeAction implements Action {
         }
       }
 
-      ParametersAction originalParamAction = currentBuild.getAction(ParametersAction.class);
+      ParametersAction originalParamAction = run.getAction(ParametersAction.class);
       if (originalParamAction == null) {
         originalParamAction = new ParametersAction();
       }
+
       actions.add(originalParamAction.createUpdated(parameterValues));
 
-      Jenkins.getInstance().getQueue().schedule((Queue.Task) currentBuild.getParent(), 0, actions);
+      Jenkins.getInstance().getQueue().schedule((Queue.Task) run.getParent(), 0, actions);
     }
 
     response.sendRedirect("../../");
