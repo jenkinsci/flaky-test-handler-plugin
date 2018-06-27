@@ -36,7 +36,7 @@ import java.util.TreeMap;
 
 import hudson.AbortException;
 import hudson.Util;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.junit.SuiteResult;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -73,7 +73,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
   private transient AbstractTestResultAction parentAction;
 
   // set during the freeze phase
-  private transient AbstractBuild owner;
+  private transient Run owner;
 
   private transient TestObject parent;
 
@@ -110,9 +110,9 @@ public final class FlakyTestResult extends MetaTabulatedResult {
   private final boolean keepLongStdio;
 
   /**
-   * Construct {@link #FlakyTestResult} from {@link #TestResult}
+   * Construct {@link #FlakyTestResult} from {@link hudson.tasks.junit.TestResult}
    *
-   * @param testResult
+   * @param testResult result of tests
    */
   public FlakyTestResult(TestResult testResult) {
     for (SuiteResult suiteResult : testResult.getSuites()) {
@@ -148,6 +148,10 @@ public final class FlakyTestResult extends MetaTabulatedResult {
   /**
    * Collect reports from the given {@link DirectoryScanner}, while
    * filtering out all files that were created before the given time.
+   *
+   * @param buildTime time of build
+   * @param results directory scanner for result files
+   * @throws IOException throws exception when opening result files fails
    */
   public void parse(long buildTime, DirectoryScanner results) throws IOException {
     String[] includedFiles = results.getIncludedFiles();
@@ -160,6 +164,10 @@ public final class FlakyTestResult extends MetaTabulatedResult {
    * filtering out all files that were created before the given time.
    *
    * @since 1.426
+   * @param buildTime time of build
+   * @param baseDir base directory
+   * @param reportFiles report file names
+   * @throws IOException throws exception when opening result files fails
    */
   public void parse(long buildTime, File baseDir, String[] reportFiles) throws IOException {
 
@@ -196,6 +204,9 @@ public final class FlakyTestResult extends MetaTabulatedResult {
    * Collect reports from the given report files
    *
    * @since 1.500
+   * @param buildTime time of build
+   * @param reportFiles list of report files
+   * @throws IOException throws exception when opening result files fails
    */
   public void parse(long buildTime, Iterable<File> reportFiles) throws IOException {
     boolean parsed=false;
@@ -275,6 +286,9 @@ public final class FlakyTestResult extends MetaTabulatedResult {
 
   /**
    * Parses an additional report file.
+   *
+   * @param reportFile additional report file
+   * @throws IOException throws exception when opening report file fails
    */
   public void parse(File reportFile) throws IOException {
     try {
@@ -304,7 +318,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
   }
 
   @Override
-  public AbstractBuild<?,?> getOwner() {
+  public Run<?,?> getRun() {
     if (parentAction != null) {
       return parentAction.owner;
     } else {
@@ -365,6 +379,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
   /**
    * Returns <tt>true</tt> if this doesn't have any any test results.
    * @since 1.511
+   * @return true or false
    */
   @Exported(visibility=999)
   public boolean isEmpty() {
@@ -539,8 +554,11 @@ public final class FlakyTestResult extends MetaTabulatedResult {
    * <p>
    * After the data is frozen, more files can be parsed
    * and then freeze can be called again.
+   *
+   * @param parent test result action
+   * @param build run/build
    */
-  public void freeze(AbstractTestResultAction parent, AbstractBuild build) {
+  public void freeze(AbstractTestResultAction parent, Run build) {
     this.parentAction = parent;
     this.owner = build;
     if(suitesByName==null) {
