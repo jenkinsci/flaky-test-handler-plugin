@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.Messages;
 import hudson.tasks.junit.TestAction;
@@ -561,7 +563,8 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
     this.parent = parent;
   }
 
-  public int compareTo(FlakyCaseResult that) {
+  @Override
+  public int compareTo(@Nonnull FlakyCaseResult that) {
     return this.getFullName().compareTo(that.getFullName());
   }
 
