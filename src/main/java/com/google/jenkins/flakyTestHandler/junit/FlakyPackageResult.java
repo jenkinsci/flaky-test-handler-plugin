@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import hudson.model.AbstractBuild;
@@ -305,6 +306,20 @@ public final class FlakyPackageResult extends MetaTabulatedResult implements Com
 
   public int compareTo(FlakyPackageResult that) {
     return this.packageName.compareTo(that.packageName);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    FlakyPackageResult that = (FlakyPackageResult) o;
+    return Objects.equals(packageName, that.packageName);
+  }
+
+  @Override
+  public int hashCode() {
+
+    return Objects.hash(packageName);
   }
 
   public String getDisplayName() {
