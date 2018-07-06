@@ -112,9 +112,6 @@ public class DeflakeAction implements Action {
     if (currentBuild != null) {
 
       Job job = currentBuild.getParent();
-      if (job == null) {
-        return;
-      }
       job.checkPermission(AbstractProject.BUILD);
       response.sendRedirect(DEFLAKE_CONFIG_URL);
     }
@@ -129,10 +126,6 @@ public class DeflakeAction implements Action {
     Run run = request.findAncestorObject(Run.class);
     if (run != null) {
       Job job = run.getParent();
-      if (job == null) {
-        response.sendRedirect("../../");
-        return;
-      }
       job.checkPermission(AbstractProject.BUILD);
       List<Action> actions = constructDeflakeCause(run);
 
