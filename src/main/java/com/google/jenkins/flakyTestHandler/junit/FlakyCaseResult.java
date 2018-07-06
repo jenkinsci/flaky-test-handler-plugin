@@ -70,7 +70,7 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
   private final String skippedMessage;
   private final String errorStackTrace;
   private final String errorDetails;
-  private transient FlakySuiteResult parent;
+  private FlakySuiteResult parent;
 
   private transient FlakyClassResult classResult;
 
