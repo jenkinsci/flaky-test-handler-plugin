@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import jenkins.triggers.SCMTriggerItem;
 import hudson.model.AbstractBuild;
@@ -175,7 +176,8 @@ public class HistoryAggregatedFlakyTestResultAction implements Action {
    */
   public static final Function<Map<String, SingleTestFlakyStats>, SingleTestFlakyStats> REVISION_STATS_MAP_TO_AGGREGATED_STATS = new Function<Map<String, SingleTestFlakyStats>, SingleTestFlakyStats>() {
     @Override
-    public SingleTestFlakyStats apply(Map<String, SingleTestFlakyStats> revisionStatsMap) {
+    @Nonnull
+    public SingleTestFlakyStats apply(@Nonnull Map<String, SingleTestFlakyStats> revisionStatsMap) {
       SingleTestFlakyStats aggregatedStatsOverRevision = new SingleTestFlakyStats(0, 0, 0);
 
       for (SingleTestFlakyStats singleTestFlakyStats : revisionStatsMap.values()) {
