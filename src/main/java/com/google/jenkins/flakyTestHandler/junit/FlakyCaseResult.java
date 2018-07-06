@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
@@ -566,6 +567,19 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
   @Override
   public int compareTo(@Nonnull FlakyCaseResult that) {
     return this.getFullName().compareTo(that.getFullName());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    FlakyCaseResult that = (FlakyCaseResult) o;
+    return Objects.equals(this.getFullName(), that.getFullName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.getFullName());
   }
 
   @Exported(name="status",visibility=9) // because stapler notices suffix 's' and remove it
