@@ -34,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 
 import hudson.model.AbstractProject;
@@ -71,7 +72,8 @@ public class DeflakeAction implements Action {
       CLASS_METHOD_MAP_TO_MAVEN_TESTS_LIST = new Function<Entry<String, Set<String>>, String>() {
 
     @Override
-    public String apply(Entry<String, Set<String>> entry) {
+    @Nonnull
+    public String apply(@Nonnull Entry<String, Set<String>> entry) {
       return entry.getKey() + SHARP + Joiner.on(PLUS).join(entry.getValue());
     }
   };
