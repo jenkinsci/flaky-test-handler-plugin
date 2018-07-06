@@ -87,7 +87,7 @@ public class FlakyTestResultAction implements RunAction2 {
         if(channel == null) {
           throw new InterruptedException("Could not get channel to run a program remotely.");
         }
-        FlakyTestResult flakyTestResult = launcher.getChannel().call(new FlakyTestResultCollector((TestResult) latestResult));
+        FlakyTestResult flakyTestResult = channel.call(new FlakyTestResultCollector((TestResult) latestResult));
 
         flakyTestResult.freeze(action, build);
         FlakyRunStats stats = new FlakyRunStats(flakyTestResult.getTestFlakyStatsMap());
