@@ -16,6 +16,7 @@ package com.google.jenkins.flakyTestHandler.plugin;
 
 import com.google.jenkins.flakyTestHandler.junit.FlakyTestResult;
 
+import hudson.remoting.VirtualChannel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -49,7 +50,11 @@ public class JUnitFlakyTestDataPublisher
   @Override
   public TestResultAction.Data contributeTestData(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, TestResult testResult)
       throws IOException, InterruptedException {
-    FlakyTestResult flakyTestResult = Objects.requireNonNull(launcher.getChannel()).call(new FlakyTestResultCollector(testResult));
+    VirtualChannel channel = launcher.getChannel();
+    if(channel == null) {
+          throw new InterruptedException("Could not get channel to run a program remotely.");
+    }
+    FlakyTestResult flakyTestResult = channel.call(new FlakyTestResultCollector(testResult));
     // TODO consider the possibility that there is >1 such action
     flakyTestResult.freeze(run.getAction(AbstractTestResultAction.class), run);
     return new JUnitFlakyTestData(flakyTestResult);

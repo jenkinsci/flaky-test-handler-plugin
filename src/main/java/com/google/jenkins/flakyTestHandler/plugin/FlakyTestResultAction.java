@@ -37,6 +37,7 @@ import hudson.XmlFile;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Run;
+import hudson.remoting.VirtualChannel;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.HeapSpaceStringConverter;
@@ -82,7 +83,11 @@ public class FlakyTestResultAction implements RunAction2 {
     if (action != null) {
       Object latestResult = action.getResult();
       if (latestResult != null && latestResult instanceof TestResult) {
-        FlakyTestResult flakyTestResult = Objects.requireNonNull(launcher.getChannel()).call(new FlakyTestResultCollector((TestResult) latestResult));
+        VirtualChannel channel = launcher.getChannel();
+        if(channel == null) {
+          throw new InterruptedException("Could not get channel to run a program remotely.");
+        }
+        FlakyTestResult flakyTestResult = launcher.getChannel().call(new FlakyTestResultCollector((TestResult) latestResult));
 
         flakyTestResult.freeze(action, build);
         FlakyRunStats stats = new FlakyRunStats(flakyTestResult.getTestFlakyStatsMap());
