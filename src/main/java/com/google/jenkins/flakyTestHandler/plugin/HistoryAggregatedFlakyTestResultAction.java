@@ -37,7 +37,6 @@ import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import jenkins.triggers.SCMTriggerItem;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Job;
@@ -94,8 +93,8 @@ public class HistoryAggregatedFlakyTestResultAction implements Action {
   void aggregate() {
 
     // set of all the previous builds
-    Stack<AbstractBuild> builds = new Stack<AbstractBuild>();
-    for (AbstractBuild<?, ?> build : project._getRuns().values()) {
+    Stack<Run> builds = new Stack<>();
+    for (Run<?, ?> build : project._getRuns().values()) {
       builds.push(build);
     }
 
@@ -327,7 +326,7 @@ public class HistoryAggregatedFlakyTestResultAction implements Action {
      * build information.
      *
      * @param stats Embedded {@link SingleTestFlakyStats} object
-     * @param build The {@link hudson.model.AbstractBuild} object to get SCM information from.
+     * @param build The {@link hudson.model.Run} object to get SCM information from.
      */
     public SingleTestFlakyStatsWithRevision(SingleTestFlakyStats stats, Run build) {
       this.stats = stats;

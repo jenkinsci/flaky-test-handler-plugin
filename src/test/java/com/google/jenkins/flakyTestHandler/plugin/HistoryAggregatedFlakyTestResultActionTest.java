@@ -29,6 +29,7 @@ import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResu
 import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResultAction.SingleTestFlakyStatsWithRevision;
 import com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause;
 
+import hudson.model.Run;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -38,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import hudson.model.AbstractBuild;
 import hudson.model.CauseAction;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -67,19 +67,19 @@ public class HistoryAggregatedFlakyTestResultActionTest {
 
     FreeStyleProject project = jenkins.createFreeStyleProject("project");
 
-    List<AbstractBuild> buildList = new ArrayList<AbstractBuild>();
+    List<Run> runList = new ArrayList<>();
 
     for (FlakyTestResultAction action : setUpFlakyTestResultAction()) {
       FreeStyleBuild build = new FreeStyleBuild(project);
       build.addAction(action);
-      buildList.add(build);
+      runList.add(build);
     }
 
     HistoryAggregatedFlakyTestResultAction action = new HistoryAggregatedFlakyTestResultAction(
         null);
 
-    for (AbstractBuild build : buildList) {
-      action.aggregateOneBuild(build);
+    for (Run run : runList) {
+      action.aggregateOneBuild(run);
     }
 
     Map<String, Map<String, SingleTestFlakyStats>> statsMapOverRevision =
@@ -147,14 +147,14 @@ public class HistoryAggregatedFlakyTestResultActionTest {
         flakyTestResultActions);
 
     // First non-deflake build
-    AbstractBuild firstBuild = (AbstractBuild) project
+    Run firstBuild = project
         .scheduleBuild2(0, flakyTestResultActionList.get(0)).get();
     while (firstBuild.isBuilding()) {
       Thread.sleep(100);
     }
 
     // Second deflake build
-    AbstractBuild secondBuild = (AbstractBuild) project
+    Run secondBuild = project
         .scheduleBuild2(0, flakyTestResultActionList.get(1),
             new CauseAction(new DeflakeCause(firstBuild))).get();
     while (secondBuild.isBuilding()) {
@@ -162,7 +162,7 @@ public class HistoryAggregatedFlakyTestResultActionTest {
     }
 
     // Third deflake build with HistoryAggregatedFlakyTestResultAction
-    AbstractBuild thirdBuild = (AbstractBuild) project
+    Run thirdBuild = project
         .scheduleBuild2(0, flakyTestResultActionList.get(2),
             new HistoryAggregatedFlakyTestResultAction(project)).get();
     while (thirdBuild.isBuilding()) {
