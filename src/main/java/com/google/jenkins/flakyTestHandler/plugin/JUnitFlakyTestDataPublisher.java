@@ -61,21 +61,6 @@ public class JUnitFlakyTestDataPublisher
   }
 
   @Override
-  public TestResultAction.Data getTestData(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, TestResult testResult) {
-      try {
-          FilePath workspace = build.getWorkspace();
-          if (workspace == null) {
-              throw new IOException("no workspace in " + build);
-          }
-          return contributeTestData(build, workspace, launcher, null, testResult);
-      } catch (IOException e) {
-          throw new IllegalStateException(e);
-      } catch (InterruptedException e) {
-          throw new IllegalStateException(e);
-      }
-  }
-
-  @Override
   public DescriptorImpl getDescriptor() {
     return (DescriptorImpl) super.getDescriptor();
   }
