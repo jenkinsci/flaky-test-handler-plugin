@@ -33,7 +33,7 @@ limitations under the License.
 
   <properties>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-    <jenkins.version>2.121.1</jenkins.version>
+    <jenkins.version>2.60.1</jenkins.version>
     <!-- Java Level to use. Java 7 required when using core >= 1.612 -->
     <java.level>8</java.level>
     <!-- <jenkins-test-harness.version>2.13</jenkins-test-harness.version> -->
