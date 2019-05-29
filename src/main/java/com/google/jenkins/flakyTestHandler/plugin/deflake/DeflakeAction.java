@@ -19,6 +19,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction;
 
+import hudson.model.Job;
+import hudson.model.Run;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -32,15 +34,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BooleanParameterValue;
 import hudson.model.CauseAction;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
+import hudson.model.Queue;
 import hudson.model.StringParameterValue;
 import jenkins.model.Jenkins;
 
@@ -69,7 +72,8 @@ public class DeflakeAction implements Action {
       CLASS_METHOD_MAP_TO_MAVEN_TESTS_LIST = new Function<Entry<String, Set<String>>, String>() {
 
     @Override
-    public String apply(Entry<String, Set<String>> entry) {
+    @Nonnull
+    public String apply(@Nonnull Entry<String, Set<String>> entry) {
       return entry.getKey() + SHARP + Joiner.on(PLUS).join(entry.getValue());
     }
   };
@@ -106,14 +110,11 @@ public class DeflakeAction implements Action {
    */
   public void doIndex(StaplerRequest request, StaplerResponse response) throws
       IOException, ServletException, InterruptedException {
-    AbstractBuild currentBuild = request.findAncestorObject(AbstractBuild.class);
+    Run currentBuild = request.findAncestorObject(Run.class);
     if (currentBuild != null) {
 
-      AbstractProject project = currentBuild.getProject();
-      if (project == null) {
-        return;
-      }
-      project.checkPermission(AbstractProject.BUILD);
+      Job job = currentBuild.getParent();
+      job.checkPermission(AbstractProject.BUILD);
       response.sendRedirect(DEFLAKE_CONFIG_URL);
     }
   }
@@ -124,15 +125,11 @@ public class DeflakeAction implements Action {
   public void doSubmitDeflakeRequest(StaplerRequest request, StaplerResponse response) throws
       IOException, ServletException, InterruptedException {
 
-    AbstractBuild currentBuild = request.findAncestorObject(AbstractBuild.class);
-    if (currentBuild != null) {
-      AbstractProject project = currentBuild.getProject();
-      if (project == null) {
-        response.sendRedirect("../../");
-        return;
-      }
-      project.checkPermission(AbstractProject.BUILD);
-      List<Action> actions = constructDeflakeCause(currentBuild);
+    Run run = request.findAncestorObject(Run.class);
+    if (run != null) {
+      Job job = run.getParent();
+      job.checkPermission(AbstractProject.BUILD);
+      List<Action> actions = constructDeflakeCause(run);
 
       JSONObject formData = request.getSubmittedForm();
       List<ParameterValue> parameterValues = new ArrayList<ParameterValue>();
@@ -147,13 +144,14 @@ public class DeflakeAction implements Action {
         }
       }
 
-      ParametersAction originalParamAction = currentBuild.getAction(ParametersAction.class);
+      ParametersAction originalParamAction = run.getAction(ParametersAction.class);
       if (originalParamAction == null) {
         originalParamAction = new ParametersAction();
       }
+
       actions.add(originalParamAction.createUpdated(parameterValues));
-      Jenkins.getInstance().getQueue().schedule2(currentBuild.getProject(), 0,
-          actions);
+
+      Jenkins.getInstance().getQueue().schedule((Queue.Task) run.getParent(), 0, actions);
     }
 
     response.sendRedirect("../../");
@@ -177,7 +175,7 @@ public class DeflakeAction implements Action {
    * @return list with all original causes and a {@link hudson.model.Cause.UserIdCause} and a {@link
    * com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause}.
    */
-  private static List<Action> constructDeflakeCause(AbstractBuild up) {
+  private static List<Action> constructDeflakeCause(Run up) {
     List<Action> actions = new ArrayList<Action>();
     actions.add(new CauseAction(new DeflakeCause(up)));
     return actions;

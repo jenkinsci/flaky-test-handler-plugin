@@ -16,15 +16,20 @@ package com.google.jenkins.flakyTestHandler.plugin;
 
 import com.google.jenkins.flakyTestHandler.junit.FlakyTestResult;
 
+import hudson.remoting.VirtualChannel;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.junit.TestDataPublisher;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
@@ -43,12 +48,15 @@ public class JUnitFlakyTestDataPublisher
   }
 
   @Override
-  public TestResultAction.Data getTestData(AbstractBuild<?, ?> abstractBuild, Launcher launcher,
-      BuildListener buildListener, TestResult testResult)
+  public TestResultAction.Data contributeTestData(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, TestResult testResult)
       throws IOException, InterruptedException {
-    FlakyTestResult flakyTestResult = launcher.getChannel().call(new FlakyTestResultCollector(testResult));
+    VirtualChannel channel = launcher.getChannel();
+    if(channel == null) {
+          throw new InterruptedException("Could not get channel to run a program remotely.");
+    }
+    FlakyTestResult flakyTestResult = channel.call(new FlakyTestResultCollector(testResult));
     // TODO consider the possibility that there is >1 such action
-    flakyTestResult.freeze(abstractBuild.getAction(AbstractTestResultAction.class), abstractBuild);
+    flakyTestResult.freeze(run.getAction(AbstractTestResultAction.class), run);
     return new JUnitFlakyTestData(flakyTestResult);
   }
 

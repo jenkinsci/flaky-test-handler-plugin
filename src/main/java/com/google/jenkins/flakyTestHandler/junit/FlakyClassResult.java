@@ -23,6 +23,7 @@ import org.kohsuke.stapler.export.Exported;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.Messages;
@@ -42,6 +43,8 @@ import hudson.tasks.test.TestResult;
  */
 public final class FlakyClassResult extends TabulatedResult implements
     Comparable<FlakyClassResult> , ActionableFlakyTestObject {
+
+  private static final long serialVersionUID = 1;
 
   private final String className; // simple name
   private transient String safeName;
@@ -235,6 +238,19 @@ public final class FlakyClassResult extends TabulatedResult implements
 
   public int compareTo(FlakyClassResult that) {
     return this.className.compareTo(that.className);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    FlakyClassResult that = (FlakyClassResult) o;
+    return Objects.equals(className, that.className);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(className);
   }
 
   public String getDisplayName() {

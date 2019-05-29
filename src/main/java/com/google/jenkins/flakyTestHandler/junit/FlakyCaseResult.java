@@ -33,7 +33,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
+
+import javax.annotation.Nonnull;
 
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.Messages;
@@ -68,7 +71,7 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
   private final String skippedMessage;
   private final String errorStackTrace;
   private final String errorDetails;
-  private transient FlakySuiteResult parent;
+  private FlakySuiteResult parent;
 
   private transient FlakyClassResult classResult;
 
@@ -160,8 +163,8 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
     String head = tx.head(HALF_MAX_SIZE);
     String tail = tx.fastTail(HALF_MAX_SIZE);
 
-    int headBytes = head.getBytes().length;
-    int tailBytes = tail.getBytes().length;
+    int headBytes = head.getBytes("UTF-8").length;
+    int tailBytes = tail.getBytes("UTF-8").length;
 
     middle = len - (headBytes+tailBytes);
     if (middle<=0) {
@@ -561,8 +564,22 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
     this.parent = parent;
   }
 
-  public int compareTo(FlakyCaseResult that) {
+  @Override
+  public int compareTo(@Nonnull FlakyCaseResult that) {
     return this.getFullName().compareTo(that.getFullName());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    FlakyCaseResult that = (FlakyCaseResult) o;
+    return Objects.equals(this.getFullName(), that.getFullName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.getFullName());
   }
 
   @Exported(name="status",visibility=9) // because stapler notices suffix 's' and remove it
@@ -587,7 +604,7 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
     return new JUnitFlakyTestDataAction(getFlakyRuns(), isFailed());
   }
 
-  /*package*/ void setClass(FlakyClassResult classResult) {
+  /*package*/ synchronized void setClass(FlakyClassResult classResult) {
     this.classResult = classResult;
   }
 

@@ -34,8 +34,9 @@ import java.util.logging.Logger;
 import hudson.Launcher;
 import hudson.XmlFile;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.remoting.VirtualChannel;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.HeapSpaceStringConverter;
@@ -69,19 +70,23 @@ public class FlakyTestResultAction implements RunAction2 {
   }
 
   /**
-   * Construct a FlakyTestResultAction object with AbstractBuild and BuildListener
+   * Construct a FlakyTestResultAction object with Run and BuildListener
    *
    * @param build this build
    * @param listener listener of this build
    */
-  public FlakyTestResultAction(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+  public FlakyTestResultAction(AbstractBuild build, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
     this.build = build;
     // TODO consider the possibility that there is >1 such action
     AbstractTestResultAction action = build.getAction(AbstractTestResultAction.class);
     if (action != null) {
       Object latestResult = action.getResult();
       if (latestResult != null && latestResult instanceof TestResult) {
-        FlakyTestResult flakyTestResult = launcher.getChannel().call(new FlakyTestResultCollector((TestResult) latestResult));
+        VirtualChannel channel = launcher.getChannel();
+        if(channel == null) {
+          throw new InterruptedException("Could not get channel to run a program remotely.");
+        }
+        FlakyTestResult flakyTestResult = channel.call(new FlakyTestResultCollector((TestResult) latestResult));
 
         flakyTestResult.freeze(action, build);
         FlakyRunStats stats = new FlakyRunStats(flakyTestResult.getTestFlakyStatsMap());
@@ -166,7 +171,7 @@ public class FlakyTestResultAction implements RunAction2 {
   /**
    * Overwrites the {@link FlakyRunStats} by a new data set.
    */
-  public synchronized void setFlakyRunStats(FlakyRunStats stats, BuildListener listener) {
+  public synchronized void setFlakyRunStats(FlakyRunStats stats, TaskListener listener) {
 
     // persist the data
     try {
