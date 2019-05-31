@@ -23,7 +23,6 @@ import hudson.model.Run;
  * @author Qingzhou Luo
  */
 public class DeflakeCause extends Cause.UpstreamCause {
-
   /**
    * DeflakeCause constructor.
    * @param up upstream failing build which is being deflaked

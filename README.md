@@ -6,3 +6,8 @@ flakiness using the new "rerunFailingTestsCount" option. It also supports re-run
 failed build at the exact failed Git revision. 
 
 Finally it aggregates statistics of tests (passes, fails and flakes) over Git revisions.
+
+The build parameter names can be changed via system properties:
+
+* jenkins.deflake.param.test (default to `test`)
+* jenkins.deflake.param.rerun_fail_test_count (default to `surefire.rerunFailingTestsCount`)
