@@ -26,10 +26,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hudson.Extension;
+import hudson.model.AbstractBuild;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import hudson.model.Action;
 import hudson.model.Cause;
+import hudson.model.Environment;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.model.Run.RunnerAbortedException;
 import hudson.model.listeners.RunListener;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
@@ -65,7 +71,7 @@ public class DeflakeListener extends RunListener<Run> {
     if (testResultAction != null && testResultAction.getFailCount() > 0) {
       // Only add deflake action if there are test failures
       run.addAction(
-          new DeflakeAction(getFailingTestClassMethodMap(testResultAction.getFailedTests())));
+          new DeflakeAction(getFailingTestClassMethodMap(testResultAction.getFailedTests()), run));
     }
   }
 
@@ -102,5 +108,30 @@ public class DeflakeListener extends RunListener<Run> {
       }
     }
     return classMethodMap;
+  }
+  
+  @Override
+  public Environment setUpEnvironment(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
+          throws IOException, InterruptedException, RunnerAbortedException {
+    AbstractBuild<?, ?> rootBuild = build.getRootBuild();
+    if (rootBuild == null) {
+      rootBuild = build;
+    }
+
+    final DeflakeAction action = rootBuild.getAction(DeflakeAction.class);
+    if (action == null) {
+      return null;
+    }
+
+    return new Environment() {
+      @Override
+      public void buildEnvVars(Map<String, String> env) {
+        env.put("DEFLAKE_FAIL_TEST", action.generateMavenTestParams());
+        Integer parentBuildNumber = action.getParentBuildNumber();
+        if (parentBuildNumber != null) {
+          env.put("DEFLAKE_BUILD_NUMBER", parentBuildNumber.toString());
+        }
+      }
+    };
   }
 }

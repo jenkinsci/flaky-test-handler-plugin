@@ -554,6 +554,9 @@ public final class FlakyTestResult extends MetaTabulatedResult {
    * <p>
    * After the data is frozen, more files can be parsed
    * and then freeze can be called again.
+   *
+   * @param parent parent action
+   * @param build current build
    */
   public void freeze(AbstractTestResultAction parent, Run build) {
     this.parentAction = parent;

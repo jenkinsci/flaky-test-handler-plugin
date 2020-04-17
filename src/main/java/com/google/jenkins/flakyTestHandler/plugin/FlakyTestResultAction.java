@@ -73,9 +73,12 @@ public class FlakyTestResultAction implements RunAction2 {
    * Construct a FlakyTestResultAction object with Run and BuildListener
    *
    * @param build this build
+   * @param launcher launcher
    * @param listener listener of this build
+   * @throws IOException when there's communication error
+   * @throws InterruptedException when not able to obtain channel
    */
-  public FlakyTestResultAction(AbstractBuild build, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
+  public FlakyTestResultAction(AbstractBuild build, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
     this.build = build;
     // TODO consider the possibility that there is >1 such action
     AbstractTestResultAction action = build.getAction(AbstractTestResultAction.class);
@@ -170,6 +173,9 @@ public class FlakyTestResultAction implements RunAction2 {
 
   /**
    * Overwrites the {@link FlakyRunStats} by a new data set.
+   * 
+   * @param stats the flaky stats
+   * @param listener the listener
    */
   public synchronized void setFlakyRunStats(FlakyRunStats stats, TaskListener listener) {
 
