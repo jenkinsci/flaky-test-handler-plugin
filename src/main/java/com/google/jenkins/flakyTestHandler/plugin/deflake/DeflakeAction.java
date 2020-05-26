@@ -23,6 +23,7 @@ import hudson.model.Job;
 import hudson.model.Run;
 import net.sf.json.JSONObject;
 
+import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -122,6 +123,7 @@ public class DeflakeAction implements Action {
   /**
    * Get parameters from submitted form and submit deflake request
    */
+  @RequirePOST
   public void doSubmitDeflakeRequest(StaplerRequest request, StaplerResponse response) throws
       IOException, ServletException, InterruptedException {
 
