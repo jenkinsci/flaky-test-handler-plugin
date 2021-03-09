@@ -29,7 +29,7 @@ limitations under the License.
   <description>Display rerun flaky tests</description>
   <version>1.0.5-SNAPSHOT</version>
   <packaging>hpi</packaging>
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/Flaky+Test+Handler+Plugin</url>
+  <url>https://github.com/jenkinsci/flaky-test-handler-plugin</url>
 
   <properties>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
