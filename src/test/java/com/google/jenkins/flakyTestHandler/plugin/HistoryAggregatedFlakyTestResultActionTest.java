@@ -30,6 +30,7 @@ import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResu
 import com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause;
 
 import hudson.model.Run;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -140,6 +141,9 @@ public class HistoryAggregatedFlakyTestResultActionTest {
 
   @Test
   public void testAggregate() throws Exception {
+    // Skip this test on Windows build server
+    Assume.assumeFalse(System.getProperty("os.name").toLowerCase().contains("win"));
+
     FreeStyleProject project = jenkins.createFreeStyleProject("project");
     List<FlakyTestResultAction> flakyTestResultActions = setUpFlakyTestResultAction();
 
