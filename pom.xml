@@ -118,13 +118,6 @@ limitations under the License.
     </dependency>
   </dependencies>
 
-  <distributionManagement>
-    <repository>
-      <id>maven.jenkins-ci.org</id>
-      <url>https://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-    </repository>
-  </distributionManagement>
-
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/flaky-test-handler-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/flaky-test-handler-plugin.git</developerConnection>
