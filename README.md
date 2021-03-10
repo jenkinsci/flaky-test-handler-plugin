@@ -76,7 +76,12 @@ If Git is not used as scm, then we use build number as revision number.
 
 ### Pipeline project type
 
-The plugin can be used in pipelines together with the [junit-realtime-test-reporter](https://www.jenkins.io/doc/pipeline/steps/junit-realtime-test-reporter/) plugin:
+Use junit pipeline plugin and choose "Publish JUnit flaky tests report" as **Additional test report features**.
+The resulting syntax should look like this:
+
+    junit testDataPublishers: [[$class: 'JUnitFlakyTestDataPublisher']], testResults: 'target/surefire-reports/TEST*.xml'
+
+The plugin can also be used in pipelines together with the [junit-realtime-test-reporter](https://www.jenkins.io/doc/pipeline/steps/junit-realtime-test-reporter/) plugin:
 
     realtimeJUnit(keepLongStdio: true, testDataPublishers: [[$class: 'JUnitFlakyTestDataPublisher']], testResults: 'target/surefire-reports/TEST*.xml') {
         sh 'mvn ...'
