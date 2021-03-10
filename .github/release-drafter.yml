@@ -1,4 +1,4 @@
 _extends: .github
 name-template: $NEXT_PATCH_VERSION
-tag-template: $NEXT_PATCH_VERSION
+tag-template: flaky-test-handler-$NEXT_PATCH_VERSION
 version-template: $MAJOR.$MINOR.$PATCH
