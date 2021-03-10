@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: flaky-test-handler-$NEXT_MINOR_VERSION
