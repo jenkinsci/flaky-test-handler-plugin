@@ -13,14 +13,7 @@ failures do not always indicate bugs in the code.
 This plugin is designed to handle flaky tests, including re-running
 failed tests, aggregate and report flaky tests statistics and so on.
 
-**Note: Currently most features of this plugin are designed for Git,
-Maven and freestyle build projects.**
-
-## Install
-
-1. Get Jenkins.
-2. Install the Cucumber Reports plugin.
-3. Restart Jenkins.
+**Note: Currently most features of this plugin are designed for Git and Maven projects.**
 
 ## Features
 
