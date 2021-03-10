@@ -62,6 +62,13 @@ public class HistoryAggregatedFlakyTestResultActionTest {
   @Rule
   public JenkinsRule jenkins = new JenkinsRule();
 
+  // Use fields instead of local variables, so that WeakReference to those in FlakyTestResultAction
+  // cannot be garbage collected during the test. Especially important when running test on Windows,
+  // as test execution is much slower there.
+  FlakyRunStats actionOneResult;
+  FlakyRunStats actionTwoResult;
+  FlakyRunStats actionThreeResult;
+
   @Test
   public void testAggregateFlakyRunsWithRevisions() throws Exception {
 
@@ -206,7 +213,7 @@ public class HistoryAggregatedFlakyTestResultActionTest {
   }
 
 
-  public static List<FlakyTestResultAction> setUpFlakyTestResultAction() {
+  private List<FlakyTestResultAction> setUpFlakyTestResultAction() {
     FlakyTestResultAction actionOne = new FlakyTestResultAction();
     FlakyTestResultAction actionTwo = new FlakyTestResultAction();
     FlakyTestResultAction actionThree = new FlakyTestResultAction();
@@ -222,7 +229,7 @@ public class HistoryAggregatedFlakyTestResultActionTest {
     testFlakyStatsWithRevisionMap.put(TEST_FOUR,
         createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FLAKED));
 
-    FlakyRunStats actionOneResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
+    actionOneResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
 
     testFlakyStatsWithRevisionMap = new HashMap<String, SingleTestFlakyStatsWithRevision>();
     testFlakyStatsWithRevisionMap.put(TEST_ONE,
@@ -234,7 +241,7 @@ public class HistoryAggregatedFlakyTestResultActionTest {
     testFlakyStatsWithRevisionMap.put(TEST_FOUR,
         createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
 
-    FlakyRunStats actionTwoResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
+    actionTwoResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
 
     testFlakyStatsWithRevisionMap = new HashMap<String, SingleTestFlakyStatsWithRevision>();
     testFlakyStatsWithRevisionMap.put(TEST_ONE,
@@ -246,7 +253,7 @@ public class HistoryAggregatedFlakyTestResultActionTest {
     testFlakyStatsWithRevisionMap.put(TEST_FOUR,
         createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.PASSED));
 
-    FlakyRunStats actionThreeResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
+    actionThreeResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
 
     actionOne.setFlakyRunStats(actionOneResult);
     actionTwo.setFlakyRunStats(actionTwoResult);
