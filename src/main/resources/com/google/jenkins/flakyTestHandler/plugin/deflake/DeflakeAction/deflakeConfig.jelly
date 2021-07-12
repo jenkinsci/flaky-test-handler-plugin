@@ -35,7 +35,7 @@ limitations under the License.
                  <f:entry title="only run failing tests" field="only-failing" description="Whether to run only failing tests" help="/plugin/flaky-test-handler/help-only-fail.html">
                  <div name="testParam" description="Whether only run failing tests">
                      <input type="hidden" name="name" value="onlyRunFailingTests" />
-                     <f:checkbox name="value" checked="false" />
+                     <f:checkbox name="value" checked="true" />
                  </div>
                  </f:entry>
 
