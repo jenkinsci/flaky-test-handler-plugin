@@ -34,8 +34,7 @@ limitations under the License.
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-    <jenkins.version>2.263.1</jenkins.version>
-    <no-test-jar>false</no-test-jar>
+    <jenkins.version>2.277.1</jenkins.version>
     <java.level>8</java.level>
   </properties>
 
