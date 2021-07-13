@@ -21,7 +21,7 @@ limitations under the License.
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>3.4</version>
+    <version>4.19</version>
   </parent>
 
   <artifactId>flaky-test-handler</artifactId>
@@ -32,12 +32,10 @@ limitations under the License.
   <url>https://github.com/jenkinsci/flaky-test-handler-plugin</url>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-    <jenkins.version>2.121.1</jenkins.version>
-    <!-- Java Level to use. Java 7 required when using core >= 1.612 -->
+    <jenkins.version>2.277.1</jenkins.version>
     <java.level>8</java.level>
-    <!-- <jenkins-test-harness.version>2.13</jenkins-test-harness.version> -->
-    <workflow.version>2.17</workflow.version>
   </properties>
 
   <developers>
@@ -108,6 +106,17 @@ limitations under the License.
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>git</artifactId>
       <version>3.9.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>script-security</artifactId>
+      <version>1.77</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>access-modifier-suppressions</artifactId>
+      <version>1.16</version>
     </dependency>
     <!-- for workflow support -->
     <dependency>

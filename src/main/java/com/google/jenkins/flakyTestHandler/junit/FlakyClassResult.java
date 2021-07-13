@@ -16,6 +16,7 @@ package com.google.jenkins.flakyTestHandler.junit;
 
 import com.google.jenkins.flakyTestHandler.plugin.JUnitFlakyAggregatedTestDataAction;
 
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -104,6 +105,7 @@ public final class FlakyClassResult extends TabulatedResult implements
     return null;
   }
 
+  @SuppressRestrictedWarnings(Messages.class)
   public String getTitle() {
     return Messages.ClassResult_getTitle(getDisplayName());
   }
