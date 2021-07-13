@@ -118,7 +118,6 @@ limitations under the License.
       <groupId>org.kohsuke</groupId>
       <artifactId>access-modifier-suppressions</artifactId>
       <version>1.16</version>
-      <scope>test</scope>
     </dependency>
     <!-- for workflow support -->
     <dependency>
