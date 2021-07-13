@@ -107,6 +107,11 @@ limitations under the License.
       <artifactId>git</artifactId>
       <version>3.9.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>access-modifier-suppressions</artifactId>
+      <version>1.16</version>
+    </dependency>
     <!-- for workflow support -->
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
