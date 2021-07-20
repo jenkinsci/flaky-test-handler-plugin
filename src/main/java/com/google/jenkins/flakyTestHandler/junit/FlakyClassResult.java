@@ -214,23 +214,8 @@ public final class FlakyClassResult extends TabulatedResult implements
     }
   }
 
-
   void freeze() {
-    passCount = failCount = skipCount = flakeCount = 0;
-    duration = 0;
-    for (FlakyCaseResult r : cases) {
-      r.setClass(this);
-      if (r.isSkipped()) {
-        skipCount++;
-      } else if (r.isFlaked()) {
-        flakeCount++;
-      } else if (r.isPassed()) {
-        passCount++;
-      } else {
-        failCount++;
-      }
-      duration += r.getDuration();
-    }
+    this.tally();
     Collections.sort(cases);
   }
 
