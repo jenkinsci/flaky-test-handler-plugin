@@ -19,13 +19,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.Messages;
@@ -79,10 +73,7 @@ public final class FlakyPackageResult extends MetaTabulatedResult implements Com
     if (safeName != null) {
       return safeName;
     }
-    Collection<FlakyPackageResult> siblings = (parent == null ? Collections.EMPTY_LIST : parent.getChildren());
-    return safeName = uniquifyName(
-        siblings,
-        safe(getName()));
+    return safeName = safe(getName());
   }
 
   @Override
