@@ -22,6 +22,7 @@ import com.google.jenkins.flakyTestHandler.plugin.JUnitFlakyTestDataAction;
 import org.apache.commons.io.FileUtils;
 import org.dom4j.Element;
 import org.jvnet.localizer.Localizable;
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
@@ -615,6 +616,7 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
   /**
    * Constants that represent the status of this test.
    */
+  @SuppressRestrictedWarnings(Messages.class)
   public enum Status {
     /**
      * This test runs OK, just like its previous run.

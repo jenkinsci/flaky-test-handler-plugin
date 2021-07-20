@@ -14,6 +14,7 @@
  */
 package com.google.jenkins.flakyTestHandler.junit;
 
+import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -114,11 +115,13 @@ public final class FlakyPackageResult extends MetaTabulatedResult implements Com
   }
 
   @Override
+  @SuppressRestrictedWarnings(Messages.class)
   public String getTitle() {
     return Messages.PackageResult_getTitle(getDisplayName());
   }
 
   @Override
+  @SuppressRestrictedWarnings(Messages.class)
   public String getChildTitle() {
     return Messages.PackageResult_getChildTitle();
   }
