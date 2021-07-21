@@ -74,6 +74,18 @@ limitations under the License.
     </pluginRepository>
   </pluginRepositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-2.277.x</artifactId>
+        <version>887.vae9c8ac09ff7</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
        <groupId>jfree</groupId>
@@ -89,7 +101,6 @@ limitations under the License.
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>junit</artifactId>
-      <version>1.24</version>
       <exclusions>
         <exclusion>
           <groupId>org.jenkins-ci.plugins</groupId>
@@ -100,17 +111,14 @@ limitations under the License.
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>annotation-indexer</artifactId>
-      <version>1.12</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>git</artifactId>
-      <version>3.9.0</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>script-security</artifactId>
-      <version>1.77</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -122,7 +130,6 @@ limitations under the License.
     <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-job</artifactId>
-      <version>2.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
