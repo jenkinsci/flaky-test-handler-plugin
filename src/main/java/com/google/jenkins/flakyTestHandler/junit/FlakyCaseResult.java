@@ -332,8 +332,7 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
       if(!Character.isJavaIdentifierPart(ch))
         buf.setCharAt(i,'_');
     }
-    Collection<FlakyCaseResult> siblings = (classResult ==null ? Collections.<FlakyCaseResult>emptyList(): classResult.getChildren());
-    return safeName = uniquifyName(siblings, buf.toString());
+    return safeName = buf.toString();
   }
 
   /**

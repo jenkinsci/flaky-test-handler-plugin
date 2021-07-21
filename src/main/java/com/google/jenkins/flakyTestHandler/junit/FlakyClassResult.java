@@ -131,7 +131,7 @@ public final class FlakyClassResult extends TabulatedResult implements
     if (safeName != null) {
       return safeName;
     }
-    return safeName = uniquifyName(parent.getChildren(), safe(getName()));
+    return safeName = safe(getName());
   }
 
   public FlakyCaseResult getCaseResult(String name) {
