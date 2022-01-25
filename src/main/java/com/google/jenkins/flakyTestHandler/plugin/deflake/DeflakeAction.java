@@ -87,7 +87,7 @@ public class DeflakeAction implements Action {
 
   @Override
   public String getIconFileName() {
-    return "clock.gif";
+    return "clock.png";
   }
 
   @Override
