@@ -376,11 +376,6 @@ public final class FlakyTestResult extends MetaTabulatedResult {
     return skippedTests;
   }
 
-  /**
-   * Returns <tt>true</tt> if this doesn't have any any test results.
-   * @since 1.511
-   * @return true or false
-   */
   @Exported(visibility=999)
   public boolean isEmpty() {
     return getTotalCount() == 0;
