@@ -30,8 +30,10 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import hudson.AbortException;
@@ -115,9 +117,15 @@ public final class FlakyTestResult extends MetaTabulatedResult {
    * @param testResult result of tests
    */
   public FlakyTestResult(TestResult testResult) {
+
+    Set<String> resultFiles = new HashSet<>();
     for (SuiteResult suiteResult : testResult.getSuites()) {
+      resultFiles.add(suiteResult.getFile());
+    }
+
+    for (String resultFile : resultFiles) {
       try {
-        suites.addAll(FlakySuiteResult.parse(new File(suiteResult.getFile()), true));
+        suites.addAll(FlakySuiteResult.parse(new File(resultFile), true));
         testResultInstance = testResult;
       } catch (DocumentException e) {
         e.printStackTrace();
