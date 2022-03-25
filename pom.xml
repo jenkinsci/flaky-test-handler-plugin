@@ -21,7 +21,7 @@ limitations under the License.
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.20</version>
+    <version>4.25</version>
   </parent>
 
   <artifactId>flaky-test-handler</artifactId>
