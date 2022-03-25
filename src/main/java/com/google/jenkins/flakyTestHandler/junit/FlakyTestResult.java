@@ -42,6 +42,7 @@ import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.MetaTabulatedResult;
 import hudson.tasks.test.TestObject;
+import org.xml.sax.SAXException;
 
 /**
  * Root of all the test results for one build, including flaky runs information.
@@ -119,13 +120,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
       try {
         suites.addAll(FlakySuiteResult.parse(new File(suiteResult.getFile()), true));
         testResultInstance = testResult;
-      } catch (DocumentException e) {
-        e.printStackTrace();
-      } catch (IOException e) {
-        e.printStackTrace();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      } catch (NullPointerException e) {
+      } catch (DocumentException | IOException | InterruptedException | NullPointerException | SAXException e) {
         e.printStackTrace();
       }
     }
@@ -294,9 +289,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
     try {
       for (FlakySuiteResult suiteResult : FlakySuiteResult.parse(reportFile, keepLongStdio))
         add(suiteResult);
-    } catch (InterruptedException e) {
-      throw new IOException("Failed to read "+reportFile,e);
-    } catch (RuntimeException e) {
+    } catch (InterruptedException | SAXException | RuntimeException e) {
       throw new IOException("Failed to read "+reportFile,e);
     } catch (DocumentException e) {
       if (!reportFile.getPath().endsWith(".xml")) {

@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.TestObject;
 import hudson.util.io.ParserConfigurator;
+import org.xml.sax.SAXException;
 
 /**
  * Result of one test suite augmented with flaky information.
@@ -101,11 +102,14 @@ public final class FlakySuiteResult implements Serializable {
    * This method returns a collection, as a single XML may have multiple &lt;testsuite>
    * elements wrapped into the top-level &lt;testsuites>.
    */
-  static List<FlakySuiteResult> parse(File xmlReport, boolean keepLongStdio) throws DocumentException, IOException, InterruptedException {
+  static List<FlakySuiteResult> parse(File xmlReport, boolean keepLongStdio) throws DocumentException, IOException, InterruptedException, SAXException {
     List<FlakySuiteResult> r = new ArrayList<FlakySuiteResult>();
 
     // parse into DOM
     SAXReader saxReader = new SAXReader();
+    saxReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+    saxReader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+    saxReader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
     ParserConfigurator.applyConfiguration(saxReader,new SuiteResultParserConfigurationContext(xmlReport));
 
     Document result = saxReader.read(xmlReport);
