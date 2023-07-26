@@ -1,4 +1,7 @@
 #!/usr/bin/env groovy
+def configurations = [
+  [ platform: "linux", jdk: "11" ],
+  [ platform: "windows", jdk: "11" ]
+]
 
-/* `buildPlugin` step provided by: https://github.com/jenkins-infra/pipeline-library */
 buildPlugin()
