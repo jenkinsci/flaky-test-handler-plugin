@@ -26,12 +26,12 @@ limitations under the License.
     </j:invoke>
     <h2> ${testName}</h2>
 
-     <table class="pane sortable bigtable" id="testStatsOverRevision">
+     <table class="jenkins-table sortable" id="testStatsOverRevision">
        <tr>
-         <td class="pane-header" style="width:4em">${%Rev Number}</td>
-         <td class="pane-header" style="width:10em">${%Revision}</td>
-         <td class="pane-header" style="width:4em">${%Passes}</td>
-         <td class="pane-header" style="width:4em">${%Fails}</td>
+         <th class="pane-header" style="width:4em">${%Rev Number}</th>
+         <th class="pane-header" style="width:10em">${%Revision}</th>
+         <th class="pane-header" style="width:3em">${%Passes}</th>
+         <th class="pane-header" style="width:3em">${%Fails}</th>
        </tr>
        <tbody>
          <j:set var="count" value="1"/>
@@ -42,11 +42,9 @@ limitations under the License.
              <td class="pane" style="text-align:left" data="${count}">
                 <j:out value="Rev #${count}"/>
              </td>
-             <td class="pane" style="text-align:left">
-                <j:out value="${revision}"/>
-             </td>
-             <td class="pane" style="text-align:left" data="${stat.pass}">${stat.pass}</td>
-             <td class="pane" style="text-align:left" data="${stat.fail}">${stat.fail}</td>
+             <td class="pane" style="text-align:left">${revision}</td>
+             <td class="pane" style="text-align:right" data="${stat.pass}">${stat.pass}</td>
+             <td class="pane" style="text-align:right" data="${stat.fail}">${stat.fail}</td>
            </tr>
          <j:set var="count" value="${count + 1}"/>
          </j:forEach>
