@@ -128,7 +128,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
       try {
         suites.addAll(FlakySuiteResult.parse(new File(resultFile), true));
         testResultInstance = testResult;
-      } catch (DocumentException | IOException | InterruptedException | NullPointerException | SAXException e) {
+      } catch (DocumentException | IOException | InterruptedException | SAXException e) {
         e.printStackTrace();
       }
     }
