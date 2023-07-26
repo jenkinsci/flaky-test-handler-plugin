@@ -23,12 +23,12 @@ limitations under the License.
          <j:otherwise>(${%Only show flaky tests})</j:otherwise>
        </j:choose>
      </a>
-     <table class="pane sortable bigtable" id="flakyStats">
+     <table class="jenkins-table sortable" id="flakyStats">
        <tr>
-         <td class="pane-header" style="width:15em">${%Test Name}</td>
-         <td class="pane-header" style="width:5em">${%Passes}</td>
-         <td class="pane-header" style="width:5em">${%Fails}</td>
-         <td class="pane-header" style="width:5em">${%Flakes}</td>
+         <th class="pane-header">${%Test Name}</th>
+         <th class="pane-header" style="width:3em">${%Passes}</th>
+         <th class="pane-header" style="width:3em">${%Fails}</th>
+         <th class="pane-header" style="width:3em">${%Flakes}</th>
        </tr>
        <tbody>
          <j:forEach var="entry" items="${it.filteredAggregatedFlakyStats.entrySet()}">
