@@ -40,9 +40,7 @@ limitations under the License.
                 method="getSafeTestName">
                 <j:arg value="${test}" type="java.lang.String" />
              </j:invokeStatic>
-             <a href="flakyStatsRevision?test=${safeName}">
-                <j:out value="${test}"/>
-             </a>
+             <a href="flakyStatsRevision?test=${safeName}">${test}</a>
              </td>
              <td class="pane" style="text-align:left" data="${stat.pass}">${stat.pass}</td>
              <td class="pane" style="text-align:left" data="${stat.fail}">${stat.fail}</td>
