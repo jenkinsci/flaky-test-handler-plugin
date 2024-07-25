@@ -17,6 +17,8 @@ package com.google.jenkins.flakyTestHandler.plugin;
 import com.google.common.collect.Maps;
 import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResultAction.SingleTestFlakyStats;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -44,6 +46,7 @@ import hudson.util.StackedAreaRenderer2;
  *
  * @author Qingzhou Luo
  */
+@SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "historical reasons i guess")
 public class TestFlakyStatsOverRevision implements Action {
 
   public final AbstractProject<?, ?> project;
