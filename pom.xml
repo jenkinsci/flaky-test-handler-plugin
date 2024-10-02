@@ -21,21 +21,23 @@ limitations under the License.
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.63</version>
+    <version>4.85</version>
   </parent>
 
   <artifactId>flaky-test-handler</artifactId>
   <name>Flaky Test Handler plugin</name>
   <description>Display rerun flaky tests</description>
-  <version>1.2.4-SNAPSHOT</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
   <url>https://github.com/jenkinsci/flaky-test-handler-plugin</url>
 
   <properties>
+    <revision>1.2.4</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/flaky-test-handler-plugin</gitHubRepo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-    <jenkins.version>2.361.4</jenkins.version>
-    <java.level>11</java.level>
+    <jenkins.version>2.440.3</jenkins.version>
   </properties>
 
   <developers>
@@ -78,8 +80,8 @@ limitations under the License.
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.277.x</artifactId>
-        <version>887.vae9c8ac09ff7</version>
+        <artifactId>bom-2.440.x</artifactId>
+        <version>3208.vb_21177d4b_cd9</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -129,10 +131,10 @@ limitations under the License.
   </dependencies>
 
   <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/flaky-test-handler-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/flaky-test-handler-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/flaky-test-handler-plugin</url>
-    <tag>flaky-test-handler-1.0.1</tag>
+    <connection>scm:git:ssh://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
 </project>
