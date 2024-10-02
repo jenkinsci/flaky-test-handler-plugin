@@ -171,15 +171,15 @@ public class DeflakeAction implements Action {
   }
 
   /**
-   * Construct a list of actions which contain deflake cause and the original failed build
+   * Construct a list of actions which contain the user and deflake cause and the original failed build
    *
    * @param up upstream build
    * @return list with all original causes and a {@link hudson.model.Cause.UserIdCause} and a {@link
    * com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause}.
    */
   private static List<Action> constructDeflakeCause(Run up) {
-    List<Action> actions = new ArrayList<Action>();
-    actions.add(new CauseAction(new DeflakeCause(up)));
+    List<Action> actions = new ArrayList<>();
+    actions.add(new CauseAction(new Cause.UserIdCause(), new DeflakeCause(up)));
     return actions;
   }
 
