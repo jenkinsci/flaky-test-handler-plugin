@@ -19,8 +19,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction;
 
-import hudson.model.Job;
-import hudson.model.Run;
+import hudson.model.*;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -38,14 +37,6 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BooleanParameterValue;
-import hudson.model.CauseAction;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
-import hudson.model.Queue;
-import hudson.model.StringParameterValue;
 import jenkins.model.Jenkins;
 
 /**
@@ -87,17 +78,26 @@ public class DeflakeAction implements Action {
 
   @Override
   public String getIconFileName() {
-    return "clock.png";
+    if (Jenkins.get().hasPermission(Item.BUILD)) {
+      return "clock.png";
+    }
+    return null;
   }
 
   @Override
   public String getDisplayName() {
-    return "Deflake this build";
+    if (Jenkins.get().hasPermission(Item.BUILD)) {
+      return "Deflake this build";
+    }
+    return null;
   }
 
   @Override
   public String getUrlName() {
-    return "deflake";
+    if (Jenkins.get().hasPermission(Item.BUILD)) {
+      return "deflake";
+    }
+    return null;
   }
 
   /**
