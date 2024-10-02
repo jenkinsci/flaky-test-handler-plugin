@@ -19,22 +19,25 @@ failed tests, aggregate and report flaky tests statistics and so on.
 
 ### Publish re-run information for flaky tests
 
-The plugin includes support for the "rerunFailingTestsCount" option of
-the Maven surefire plug-in which produces additional data about test
-flakiness. It lets users to choose to re-run failed tests up to N times,
+The plugin includes support for the **rerunFailingTestsCount** option of
+the [Maven Surefire Plugin](https://maven.apache.org/surefire/maven-surefire-plugin/) and
+the test framework [Picklejar-Engine](https://github.com/wireapp/picklejar-engine) which
+allows automatic reruns of failed tests and produces additional data about test flakiness.
+
+It lets users choose to re-run failed tests up to N times,
 and if it passes within any of those N times, the re-run will stop and
 the test will be marked as a "Flake". The build will be marked as
 successful if there is no failed tests but only "flaky" tests.
 
 ### "Deflake" Action for Builds with Failed Tests
 
-The plugin provides a "Deflake" action. It is different from rebuilding the project, as it will:
+The plugin provides a **Deflake** action. It is different from rebuilding the project, as it will:
 1) (Optionally) Checkout the exact revision of that failing build
 2) Only run all previously failed tests
 
 ![Deflake Action](images/deflake_label.png)
 
-After clicking "Deflake", there is another configuration window.
+After clicking **Deflake**, there is another configuration window.
 
 ![Deflake Action Configuration](images/deflake_config.png)
 
@@ -53,7 +56,7 @@ Deflake build will show up as **"Deflake Build \# ..."**.
 
 Display all the re-runs in the test result page:
 
-![Passed Test Result](images/flaky_pass.png)
+![Test Results](images/flaky_results.png)
 
 Display flaky tests information in the test result table as a badge:
 
