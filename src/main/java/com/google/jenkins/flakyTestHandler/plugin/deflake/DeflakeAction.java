@@ -19,8 +19,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction;
 
-import hudson.model.Job;
-import hudson.model.Run;
+import hudson.model.*;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -38,14 +37,6 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BooleanParameterValue;
-import hudson.model.CauseAction;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
-import hudson.model.Queue;
-import hudson.model.StringParameterValue;
 import jenkins.model.Jenkins;
 
 /**
@@ -171,15 +162,15 @@ public class DeflakeAction implements Action {
   }
 
   /**
-   * Construct a list of actions which contain deflake cause and the original failed build
+   * Construct a list of actions which contain the user and deflake cause and the original failed build
    *
    * @param up upstream build
    * @return list with all original causes and a {@link hudson.model.Cause.UserIdCause} and a {@link
    * com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause}.
    */
   private static List<Action> constructDeflakeCause(Run up) {
-    List<Action> actions = new ArrayList<Action>();
-    actions.add(new CauseAction(new DeflakeCause(up)));
+    List<Action> actions = new ArrayList<>();
+    actions.add(new CauseAction(new Cause.UserIdCause(), new DeflakeCause(up)));
     return actions;
   }
 
