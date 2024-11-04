@@ -65,7 +65,7 @@ public class DeflakeListener extends RunListener<Run> {
     if (testResultAction != null && testResultAction.getFailCount() > 0) {
       // Only add deflake action if there are test failures
       run.addAction(
-          new DeflakeAction(getFailingTestClassMethodMap(testResultAction.getFailedTests())));
+          new DeflakeAction(run, getFailingTestClassMethodMap(testResultAction.getFailedTests())));
     }
   }
 

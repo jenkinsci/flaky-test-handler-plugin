@@ -18,12 +18,14 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Sets;
 
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 public class DeflakeActionTest {
 
@@ -34,8 +36,11 @@ public class DeflakeActionTest {
   private final static String TEST_METHOD_TWO = "methodTwo";
   private final static String TEST_METHOD_THREE = "methodThree";
 
+  @Rule
+  public JenkinsRule jenkins = new JenkinsRule();
+
   @Test
-  public void testGenerateMavenTestParamsForSingleTest() {
+  public void testGenerateMavenTestParamsForSingleTest() throws IOException {
     Map<String, Set<String>> classMethodMap = new LinkedHashMap<String, Set<String>>();
     classMethodMap.put(TEST_CLASS_TWO, Sets.newHashSet(TEST_METHOD_THREE));
     testGenerateMavenTestParams(classMethodMap, "classTwo#methodThree",
@@ -43,7 +48,7 @@ public class DeflakeActionTest {
   }
 
   @Test
-  public void testGenerateMavenTestParamsForMultipleTests() {
+  public void testGenerateMavenTestParamsForMultipleTests() throws IOException {
     Map<String, Set<String>> classMethodMap = new LinkedHashMap<String, Set<String>>();
     classMethodMap.put(TEST_CLASS_ONE,
         Sets.newLinkedHashSet(Arrays.asList(TEST_METHOD_ONE, TEST_METHOD_TWO)));
@@ -53,8 +58,10 @@ public class DeflakeActionTest {
   }
 
   private void testGenerateMavenTestParams(Map<String, Set<String>> classMethodMap,
-      String expectedTestParam, String errorMsg) {
-    DeflakeAction action = new DeflakeAction(classMethodMap);
+                                           String expectedTestParam, String errorMsg) throws IOException {
+    FreeStyleProject project = jenkins.createFreeStyleProject("project");
+    FreeStyleBuild build = new FreeStyleBuild(project);
+    DeflakeAction action = new DeflakeAction(build, classMethodMap);
     assertEquals(errorMsg, expectedTestParam,
         action.generateMavenTestParams());
   }
