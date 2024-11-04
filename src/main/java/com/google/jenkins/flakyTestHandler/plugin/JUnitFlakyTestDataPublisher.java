@@ -17,6 +17,7 @@ package com.google.jenkins.flakyTestHandler.plugin;
 import com.google.jenkins.flakyTestHandler.junit.FlakyTestResult;
 
 import hudson.remoting.VirtualChannel;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -67,6 +68,7 @@ public class JUnitFlakyTestDataPublisher
 
 
   @Extension
+  @Symbol("junitFlakyTestPublisher")
   public static class DescriptorImpl extends Descriptor<TestDataPublisher> {
 
     @Override
