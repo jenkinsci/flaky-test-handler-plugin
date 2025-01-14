@@ -37,7 +37,7 @@ limitations under the License.
     <gitHubRepo>jenkinsci/flaky-test-handler-plugin</gitHubRepo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline2.440</jenkins.baseline>
+    <jenkins.baseline>2.440</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
   </properties>
 
