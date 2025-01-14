@@ -36,8 +36,9 @@ limitations under the License.
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/flaky-test-handler-plugin</gitHubRepo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-    <jenkins.version>2.440.3</jenkins.version>
+    <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+    <jenkins.baseline2.440</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
   </properties>
 
   <developers>
@@ -80,7 +81,7 @@ limitations under the License.
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.440.x</artifactId>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
         <version>3208.vb_21177d4b_cd9</version>
         <scope>import</scope>
         <type>pom</type>
