@@ -15,8 +15,8 @@
 package com.google.jenkins.flakyTestHandler.junit;
 
 import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.export.Exported;
 
 import java.util.*;
@@ -152,7 +152,7 @@ public final class FlakyPackageResult extends MetaTabulatedResult implements Com
 
 
   @Override
-  public Object getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
+  public Object getDynamic(String name, StaplerRequest2 req, StaplerResponse2 rsp) {
     FlakyClassResult result = getClassResult(name);
     if (result != null) {
       return result;

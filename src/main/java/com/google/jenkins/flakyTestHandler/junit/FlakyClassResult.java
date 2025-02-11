@@ -17,8 +17,8 @@ package com.google.jenkins.flakyTestHandler.junit;
 import com.google.jenkins.flakyTestHandler.plugin.JUnitFlakyAggregatedTestDataAction;
 
 import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.export.Exported;
 
 import java.util.ArrayList;
@@ -144,7 +144,7 @@ public final class FlakyClassResult extends TabulatedResult implements
   }
 
   @Override
-  public Object getDynamic(String name, StaplerRequest req, StaplerResponse rsp) {
+  public Object getDynamic(String name, StaplerRequest2 req, StaplerResponse2 rsp) {
     FlakyCaseResult c = getCaseResult(name);
     if (c != null) {
       return c;

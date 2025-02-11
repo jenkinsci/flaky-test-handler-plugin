@@ -21,8 +21,8 @@ import com.google.common.collect.Maps;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction.FlakyRunStats;
 import com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause;
 
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Stack;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import jenkins.triggers.SCMTriggerItem;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -193,7 +193,7 @@ public class HistoryAggregatedFlakyTestResultAction implements Action {
     }
   };
 
-  public void doShowAll(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+  public void doShowAll(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException, ServletException {
     onlyShowFlakyTests = !onlyShowFlakyTests;
     rsp.sendRedirect("..");
   }

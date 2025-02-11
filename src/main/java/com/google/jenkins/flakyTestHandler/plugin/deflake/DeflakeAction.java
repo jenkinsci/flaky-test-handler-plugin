@@ -23,8 +23,8 @@ import hudson.model.*;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.interceptor.RequirePOST;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import jenkins.model.Jenkins;
 
@@ -103,13 +103,13 @@ public class DeflakeAction implements Action {
   /**
    * Handles the rebuild request and redirects to deflake config page
    *
-   * @param request StaplerRequest the request.
-   * @param response StaplerResponse the response handler.
+   * @param request StaplerRequest2 the request.
+   * @param response StaplerResponse2 the response handler.
    * @throws java.io.IOException in case of Stapler issues
-   * @throws javax.servlet.ServletException if something unfortunate happens.
+   * @throws jakarta.servlet.ServletException if something unfortunate happens.
    * @throws InterruptedException if something unfortunate happens.
    */
-  public void doIndex(StaplerRequest request, StaplerResponse response) throws
+  public void doIndex(StaplerRequest2 request, StaplerResponse2 response) throws
       IOException, ServletException, InterruptedException {
     Run currentBuild = request.findAncestorObject(Run.class);
     if (currentBuild != null) {
@@ -124,7 +124,7 @@ public class DeflakeAction implements Action {
    * Get parameters from submitted form and submit deflake request
    */
   @RequirePOST
-  public void doSubmitDeflakeRequest(StaplerRequest request, StaplerResponse response) throws
+  public void doSubmitDeflakeRequest(StaplerRequest2 request, StaplerResponse2 response) throws
       IOException, ServletException, InterruptedException {
 
     Run run = request.findAncestorObject(Run.class);
