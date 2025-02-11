@@ -20,7 +20,7 @@ limitations under the License.
 
     <st:include page="sidepanel.jelly" it="${it.project}" />
     <l:main-panel>
-    <j:set var="testName" value="${request.getParameter('test')}"/>
+    <j:set var="testName" value="${request2.getParameter('test')}"/>
     <j:invoke var="statsMap" on="${it}" method="getFlakyStatsMap">
       <j:arg value="${testName}" type="java.lang.String" />
     </j:invoke>

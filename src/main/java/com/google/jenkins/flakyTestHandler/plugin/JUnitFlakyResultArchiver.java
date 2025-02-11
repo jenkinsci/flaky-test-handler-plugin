@@ -17,7 +17,7 @@ package com.google.jenkins.flakyTestHandler.plugin;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -105,7 +105,7 @@ public class JUnitFlakyResultArchiver extends Recorder implements
 
     @Override
     public Publisher
-    newInstance(StaplerRequest req, JSONObject formData)
+    newInstance(StaplerRequest2 req, JSONObject formData)
         throws hudson.model.Descriptor.FormException {
       return new JUnitFlakyResultArchiver();
     }

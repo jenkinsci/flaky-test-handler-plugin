@@ -19,8 +19,8 @@ import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResu
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.dom4j.DocumentException;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.export.Exported;
 
 import java.io.File;
@@ -468,7 +468,7 @@ public final class FlakyTestResult extends MetaTabulatedResult {
   }
 
   @Override
-  public Object getDynamic(String token, StaplerRequest req, StaplerResponse rsp) {
+  public Object getDynamic(String token, StaplerRequest2 req, StaplerResponse2 rsp) {
     if (token.equals(getId())) {
       return this;
     }
