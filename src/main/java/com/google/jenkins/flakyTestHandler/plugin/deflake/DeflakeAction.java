@@ -61,24 +61,27 @@ public class DeflakeAction implements Action {
   private static final String PLUS = "+";
 
   private static final Function<Map.Entry<String, Set<String>>, String>
-      CLASS_METHOD_MAP_TO_MAVEN_TESTS_LIST = new Function<Entry<String, Set<String>>, String>() {
+          CLASS_METHOD_MAP_TO_MAVEN_TESTS_LIST = new Function<>() {
 
-    @Override
-    @Nonnull
-    public String apply(@Nonnull Entry<String, Set<String>> entry) {
-      return entry.getKey() + SHARP + Joiner.on(PLUS).join(entry.getValue());
-    }
+      @Override
+      @Nonnull
+      public String apply(@Nonnull Entry<String, Set<String>> entry) {
+          return entry.getKey() + SHARP + Joiner.on(PLUS).join(entry.getValue());
+      }
   };
 
   private final Map<String, Set<String>> failingClassMethodMap;
 
-  public DeflakeAction(Map<String, Set<String>> failingClassMethodMap) {
+  private final Run run;
+
+  public DeflakeAction(Run run, Map<String, Set<String>> failingClassMethodMap) {
+    this.run = run;
     this.failingClassMethodMap = failingClassMethodMap;
   }
 
   @Override
   public String getIconFileName() {
-    if (Jenkins.get().hasPermission(Item.BUILD)) {
+    if (Jenkins.get().hasPermission(Item.BUILD) || run.getParent().hasPermission(Item.BUILD)) {
       return "clock.png";
     }
     return null;
@@ -86,7 +89,7 @@ public class DeflakeAction implements Action {
 
   @Override
   public String getDisplayName() {
-    if (Jenkins.get().hasPermission(Item.BUILD)) {
+    if (Jenkins.get().hasPermission(Item.BUILD) || run.getParent().hasPermission(Item.BUILD)) {
       return "Deflake this build";
     }
     return null;
@@ -94,7 +97,7 @@ public class DeflakeAction implements Action {
 
   @Override
   public String getUrlName() {
-    if (Jenkins.get().hasPermission(Item.BUILD)) {
+    if (Jenkins.get().hasPermission(Item.BUILD) || run.getParent().hasPermission(Item.BUILD)) {
       return "deflake";
     }
     return null;
