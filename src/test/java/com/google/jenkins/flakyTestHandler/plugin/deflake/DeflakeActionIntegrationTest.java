@@ -14,26 +14,9 @@
  */
 package com.google.jenkins.flakyTestHandler.plugin.deflake;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.collect.Sets;
-
-import hudson.model.Action;
-import hudson.model.CauseAction;
-import hudson.model.queue.QueueTaskFuture;
-import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-
-import java.util.List;
-import java.util.Set;
-
 import hudson.model.BuildListener;
+import hudson.model.CauseAction;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -42,123 +25,135 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class DeflakeActionIntegrationTest {
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Set;
 
-  @Rule
-  public JenkinsRule jenkins = new JenkinsRule();
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-  @Test
-  public void testDeflakeAction() throws Exception {
-    FreeStyleProject fooProj = jenkins.createFreeStyleProject("foo");
-    FreeStyleBuild build = (FreeStyleBuild) fooProj.scheduleBuild2(0, new FailingTestResultAction())
-        .get();
+@WithJenkins
+class DeflakeActionIntegrationTest {
 
-    // Assert deflake action is not null when there are failing tests
-    DeflakeAction action = build.getAction(DeflakeAction.class);
-    assertNotNull("Deflake action is not available when there are failing tests", action);
+    @Test
+    void testDeflakeAction(JenkinsRule jenkins) throws Exception {
+        FreeStyleProject fooProj = jenkins.createFreeStyleProject("foo");
+        FreeStyleBuild build = fooProj.scheduleBuild2(0, new FailingTestResultAction())
+                .get();
 
-    Set<String> possibleResults = Sets.newHashSet("classOne#methodOne+methodTwo,classTwo#methodOne",
-        "classOne#methodTwo+methodOne,classTwo#methodOne",
-        "classTwo#methodOne,classOne#methodTwo+methodOne",
-        "classTwo#methodOne,classOne#methodOne+methodTwo");
-    assertTrue("Incorrect test parameter for maven",
-        possibleResults.contains(action.generateMavenTestParams()));
-    assertDisplayName(build, "#1");
+        // Assert deflake action is not null when there are failing tests
+        DeflakeAction action = build.getAction(DeflakeAction.class);
+        assertNotNull(action, "Deflake action is not available when there are failing tests");
 
-    // Verify display name
-    build = fooProj.scheduleBuild2(0, new DeflakeCause(build)).get();
-    assertDisplayName(build, "#2: Deflake Build #1");
+        Set<String> possibleResults = Sets.newHashSet("classOne#methodOne+methodTwo,classTwo#methodOne",
+                "classOne#methodTwo+methodOne,classTwo#methodOne",
+                "classTwo#methodOne,classOne#methodTwo+methodOne",
+                "classTwo#methodOne,classOne#methodOne+methodTwo");
+        assertTrue(possibleResults.contains(action.generateMavenTestParams()),
+                "Incorrect test parameter for maven");
+        assertDisplayName(build, "#1");
 
-    // deflake action is null when there is no failing test or not test result action
-    build = fooProj.scheduleBuild2(0).get();
-    assertNull(build.getAction(DeflakeAction.class));
+        // Verify display name
+        build = fooProj.scheduleBuild2(0, new DeflakeCause(build)).get();
+        assertDisplayName(build, "#2: Deflake Build #1");
 
-    build = (FreeStyleBuild) fooProj.scheduleBuild2(0, new NoFailingTestResultAction()).get();
-    assertNull(build.getAction(DeflakeAction.class));
-  }
+        // deflake action is null when there is no failing test or not test result action
+        build = fooProj.scheduleBuild2(0).get();
+        assertNull(build.getAction(DeflakeAction.class));
 
-  @Test
-  public void testDeflakeActionForPipeline() throws Exception {
-    WorkflowJob fooProj = jenkins.createProject(WorkflowJob.class, "foo");
-    WorkflowRun run = (WorkflowRun) fooProj.scheduleBuild2(0, new FailingTestResultAction()).get();
-
-    // Assert deflake action is not null when there are failing tests
-    DeflakeAction action = run.getAction(DeflakeAction.class);
-    assertNotNull("Deflake action is not available when there are failing tests", action);
-
-    Set<String> possibleResults = Sets.newHashSet("classOne#methodOne+methodTwo,classTwo#methodOne",
-            "classOne#methodTwo+methodOne,classTwo#methodOne",
-            "classTwo#methodOne,classOne#methodTwo+methodOne",
-            "classTwo#methodOne,classOne#methodOne+methodTwo");
-    assertTrue("Incorrect test parameter for maven",
-            possibleResults.contains(action.generateMavenTestParams()));
-    assertDisplayName(run, "#1");
-
-    // Verify display name
-    run = fooProj.scheduleBuild2(0, new CauseAction(new DeflakeCause(run))).get();
-    assertDisplayName(run, "#2: Deflake Build #1");
-
-    // deflake action is null when there is no failing test or not test result action
-    run = fooProj.scheduleBuild2(0).get();
-    assertNull(run.getAction(DeflakeAction.class));
-
-    run = (WorkflowRun) fooProj.scheduleBuild2(0, new NoFailingTestResultAction()).get();
-    assertNull(run.getAction(DeflakeAction.class));
-  }
-
-  private void assertDisplayName(FreeStyleBuild build, String expectedName) {
-    assertEquals(Result.SUCCESS, build.getResult());
-    assertEquals(expectedName, build.getDisplayName());
-  }
-
-  private void assertDisplayName(WorkflowRun run, String expectedName) {
-    assertEquals(Result.FAILURE, run.getResult());
-    assertEquals(expectedName, run.getDisplayName());
-  }
-
-  public static class FailingTestResultAction extends TestResultAction {
-
-    public FailingTestResultAction() {
-      super(new TestResult(), new StreamBuildListener(System.out));
+        build = fooProj.scheduleBuild2(0, new NoFailingTestResultAction()).get();
+        assertNull(build.getAction(DeflakeAction.class));
     }
 
-    @Override
-    public int getFailCount() {
-      return 1;
+    @Test
+    void testDeflakeActionForPipeline(JenkinsRule jenkins) throws Exception {
+        WorkflowJob fooProj = jenkins.createProject(WorkflowJob.class, "foo");
+        WorkflowRun run = fooProj.scheduleBuild2(0, new FailingTestResultAction()).get();
+
+        // Assert deflake action is not null when there are failing tests
+        DeflakeAction action = run.getAction(DeflakeAction.class);
+        assertNotNull(action, "Deflake action is not available when there are failing tests");
+
+        Set<String> possibleResults = Sets.newHashSet("classOne#methodOne+methodTwo,classTwo#methodOne",
+                "classOne#methodTwo+methodOne,classTwo#methodOne",
+                "classTwo#methodOne,classOne#methodTwo+methodOne",
+                "classTwo#methodOne,classOne#methodOne+methodTwo");
+        assertTrue(possibleResults.contains(action.generateMavenTestParams()),
+                "Incorrect test parameter for maven");
+        assertDisplayName(run, "#1");
+
+        // Verify display name
+        run = fooProj.scheduleBuild2(0, new CauseAction(new DeflakeCause(run))).get();
+        assertDisplayName(run, "#2: Deflake Build #1");
+
+        // deflake action is null when there is no failing test or not test result action
+        run = fooProj.scheduleBuild2(0).get();
+        assertNull(run.getAction(DeflakeAction.class));
+
+        run = fooProj.scheduleBuild2(0, new NoFailingTestResultAction()).get();
+        assertNull(run.getAction(DeflakeAction.class));
     }
 
-    @Override
-    public int getTotalCount() {
-      return 0;
+    private void assertDisplayName(FreeStyleBuild build, String expectedName) {
+        assertEquals(Result.SUCCESS, build.getResult());
+        assertEquals(expectedName, build.getDisplayName());
     }
 
-    @Override
-    public List<CaseResult> getFailedTests() {
-      return DeflakeListenerTest.setupCaseResultList();
+    private void assertDisplayName(WorkflowRun run, String expectedName) {
+        assertEquals(Result.FAILURE, run.getResult());
+        assertEquals(expectedName, run.getDisplayName());
     }
 
-    @Override
-    public synchronized void setResult(TestResult result, BuildListener listener) {
-    }
-  }
+    public static class FailingTestResultAction extends TestResultAction {
 
-  private static class NoFailingTestResultAction extends
-      AbstractTestResultAction<FailingTestResultAction> {
+        public FailingTestResultAction() {
+            super(new TestResult(), new StreamBuildListener(System.out, StandardCharsets.UTF_8));
+        }
 
-    @Override
-    public int getFailCount() {
-      return 0;
+        @Override
+        public int getFailCount() {
+            return 1;
+        }
+
+        @Override
+        public int getTotalCount() {
+            return 0;
+        }
+
+        @Override
+        public List<CaseResult> getFailedTests() {
+            return DeflakeListenerTest.setupCaseResultList();
+        }
+
+        @Override
+        public synchronized void setResult(TestResult result, BuildListener listener) {
+        }
     }
 
-    @Override
-    public int getTotalCount() {
-      return 1;
-    }
+    private static class NoFailingTestResultAction extends
+            AbstractTestResultAction<FailingTestResultAction> {
 
-    @Override
-    public Object getResult() {
-      return null;
+        @Override
+        public int getFailCount() {
+            return 0;
+        }
+
+        @Override
+        public int getTotalCount() {
+            return 1;
+        }
+
+        @Override
+        public Object getResult() {
+            return null;
+        }
     }
-  }
 }

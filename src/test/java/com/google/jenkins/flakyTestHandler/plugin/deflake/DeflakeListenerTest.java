@@ -14,71 +14,71 @@
  */
 package com.google.jenkins.flakyTestHandler.plugin.deflake;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Sets;
-
-import org.junit.Test;
+import hudson.tasks.junit.CaseResult;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import hudson.tasks.junit.CaseResult;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class DeflakeListenerTest {
+class DeflakeListenerTest {
 
-  private final static String TEST_CLASS_ONE = "classOne";
-  private final static String TEST_CLASS_TWO = "classTwo";
+    private static final String TEST_CLASS_ONE = "classOne";
+    private static final String TEST_CLASS_TWO = "classTwo";
 
-  private final static String TEST_METHOD_ONE = "methodOne";
-  private final static String TEST_METHOD_TWO = "methodTwo";
+    private static final String TEST_METHOD_ONE = "methodOne";
+    private static final String TEST_METHOD_TWO = "methodTwo";
 
-  @Test
-  public void testGetFailingTestClassMethodMap() throws Exception {
-    List<CaseResult> caseResultList = setupCaseResultList();
-    Map<String, Set<String>> classMethodMap = DeflakeListener.getFailingTestClassMethodMap(
-        caseResultList);
-    assertEquals("Map size should be equal to number of classes", 2, classMethodMap.size());
-    Set<String> expectedClassOneMethods = Sets.newHashSet(TEST_METHOD_ONE, TEST_METHOD_TWO);
-    Set<String> expectedClassTwoMethods = Sets.newHashSet(TEST_METHOD_ONE);
+    @Test
+    void testGetFailingTestClassMethodMap() {
+        List<CaseResult> caseResultList = setupCaseResultList();
+        Map<String, Set<String>> classMethodMap = DeflakeListener.getFailingTestClassMethodMap(
+                caseResultList);
+        assertEquals(2, classMethodMap.size(), "Map size should be equal to number of classes");
+        Set<String> expectedClassOneMethods = Sets.newHashSet(TEST_METHOD_ONE, TEST_METHOD_TWO);
+        Set<String> expectedClassTwoMethods = Sets.newHashSet(TEST_METHOD_ONE);
 
-    assertEquals("Incorrect test methods", expectedClassOneMethods,
-        classMethodMap.get(TEST_CLASS_ONE));
-    assertEquals("Incorrect test methods", expectedClassTwoMethods,
-        classMethodMap.get(TEST_CLASS_TWO));
-  }
+        assertEquals(expectedClassOneMethods,
+                classMethodMap.get(TEST_CLASS_ONE),
+                "Incorrect test methods");
+        assertEquals(expectedClassTwoMethods,
+                classMethodMap.get(TEST_CLASS_TWO),
+                "Incorrect test methods");
+    }
 
-  @Test
-  public void testGetFailingTestClassMethodMapWithNoTest() {
-    assertTrue("Should return empty map for empty input list",
-        DeflakeListener.getFailingTestClassMethodMap(new ArrayList<CaseResult>()).isEmpty());
-    assertTrue("Should return empty map for null input list",
-        DeflakeListener.getFailingTestClassMethodMap(null).isEmpty());
-  }
+    @Test
+    void testGetFailingTestClassMethodMapWithNoTest() {
+        assertTrue(DeflakeListener.getFailingTestClassMethodMap(new ArrayList<>()).isEmpty(),
+                "Should return empty map for empty input list");
+        assertTrue(DeflakeListener.getFailingTestClassMethodMap(null).isEmpty(),
+                "Should return empty map for null input list");
+    }
 
-  static List<CaseResult> setupCaseResultList() {
-    CaseResult caseOne = mock(CaseResult.class);
-    CaseResult caseTwo = mock(CaseResult.class);
-    CaseResult caseThree = mock(CaseResult.class);
+    static List<CaseResult> setupCaseResultList() {
+        CaseResult caseOne = mock(CaseResult.class);
+        CaseResult caseTwo = mock(CaseResult.class);
+        CaseResult caseThree = mock(CaseResult.class);
 
-    when(caseOne.getClassName()).thenReturn(TEST_CLASS_ONE);
-    when(caseOne.getName()).thenReturn(TEST_METHOD_ONE);
+        when(caseOne.getClassName()).thenReturn(TEST_CLASS_ONE);
+        when(caseOne.getName()).thenReturn(TEST_METHOD_ONE);
 
-    when(caseTwo.getClassName()).thenReturn(TEST_CLASS_ONE);
-    when(caseTwo.getName()).thenReturn(TEST_METHOD_TWO);
+        when(caseTwo.getClassName()).thenReturn(TEST_CLASS_ONE);
+        when(caseTwo.getName()).thenReturn(TEST_METHOD_TWO);
 
-    when(caseThree.getClassName()).thenReturn(TEST_CLASS_TWO);
-    when(caseThree.getName()).thenReturn(TEST_METHOD_ONE);
+        when(caseThree.getClassName()).thenReturn(TEST_CLASS_TWO);
+        when(caseThree.getName()).thenReturn(TEST_METHOD_ONE);
 
-    List<CaseResult> caseResultList = new ArrayList<CaseResult>();
-    caseResultList.add(caseOne);
-    caseResultList.add(caseTwo);
-    caseResultList.add(caseThree);
-    return caseResultList;
-  }
+        List<CaseResult> caseResultList = new ArrayList<>();
+        caseResultList.add(caseOne);
+        caseResultList.add(caseTwo);
+        caseResultList.add(caseThree);
+        return caseResultList;
+    }
 }
