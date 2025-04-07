@@ -15,31 +15,29 @@
 
 package com.google.jenkins.flakyTestHandler.junit;
 
-import junit.framework.TestCase;
-
+import org.junit.jupiter.api.Test;
 import org.jvnet.localizer.LocaleProvider;
 
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 /**
  * Test class copied from hudson.tasks.junit.CaseResultTest
- *
+ * <p>
  * https://github.com/jenkinsci/jenkins/blob/master/core/src/test/java/hudson/tasks/junit/
  * CaseResultTest.java
  */
-public class FlakyCaseResultTest extends TestCase {
-
-    public FlakyCaseResultTest(String name) {
-        super(name);
-    }
+class FlakyCaseResultTest {
 
     // @Bug(6824)
-    public void testLocalizationOfStatus() throws Exception {
+    @Test
+    void testLocalizationOfStatus() {
         LocaleProvider old = LocaleProvider.getProvider();
         try {
-            final AtomicReference<Locale> locale = new AtomicReference<Locale>();
+            final AtomicReference<Locale> locale = new AtomicReference<>();
             LocaleProvider.setProvider(new LocaleProvider() {
                 public @Override Locale get() {
                     return locale.get();

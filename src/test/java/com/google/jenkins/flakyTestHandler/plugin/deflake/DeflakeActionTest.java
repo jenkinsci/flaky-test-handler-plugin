@@ -14,48 +14,48 @@
  */
 package com.google.jenkins.flakyTestHandler.plugin.deflake;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.Sets;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class DeflakeActionTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-  private final static String TEST_CLASS_ONE = "classOne";
-  private final static String TEST_CLASS_TWO = "classTwo";
+class DeflakeActionTest {
 
-  private final static String TEST_METHOD_ONE = "methodOne";
-  private final static String TEST_METHOD_TWO = "methodTwo";
-  private final static String TEST_METHOD_THREE = "methodThree";
+    private static final String TEST_CLASS_ONE = "classOne";
+    private static final String TEST_CLASS_TWO = "classTwo";
 
-  @Test
-  public void testGenerateMavenTestParamsForSingleTest() {
-    Map<String, Set<String>> classMethodMap = new LinkedHashMap<String, Set<String>>();
-    classMethodMap.put(TEST_CLASS_TWO, Sets.newHashSet(TEST_METHOD_THREE));
-    testGenerateMavenTestParams(classMethodMap, "classTwo#methodThree",
-        "Wrong test parameters for single test class");
-  }
+    private static final String TEST_METHOD_ONE = "methodOne";
+    private static final String TEST_METHOD_TWO = "methodTwo";
+    private static final String TEST_METHOD_THREE = "methodThree";
 
-  @Test
-  public void testGenerateMavenTestParamsForMultipleTests() {
-    Map<String, Set<String>> classMethodMap = new LinkedHashMap<String, Set<String>>();
-    classMethodMap.put(TEST_CLASS_ONE,
-        Sets.newLinkedHashSet(Arrays.asList(TEST_METHOD_ONE, TEST_METHOD_TWO)));
-    classMethodMap.put(TEST_CLASS_TWO, Sets.newHashSet(TEST_METHOD_THREE));
-    testGenerateMavenTestParams(classMethodMap, "classOne#methodOne+methodTwo,classTwo#methodThree",
-        "Wrong test parameters for multiple test classes");
-  }
+    @Test
+    void testGenerateMavenTestParamsForSingleTest() {
+        Map<String, Set<String>> classMethodMap = new LinkedHashMap<>();
+        classMethodMap.put(TEST_CLASS_TWO, Sets.newHashSet(TEST_METHOD_THREE));
+        testGenerateMavenTestParams(classMethodMap, "classTwo#methodThree",
+                "Wrong test parameters for single test class");
+    }
 
-  private void testGenerateMavenTestParams(Map<String, Set<String>> classMethodMap,
-      String expectedTestParam, String errorMsg) {
-    DeflakeAction action = new DeflakeAction(classMethodMap);
-    assertEquals(errorMsg, expectedTestParam,
-        action.generateMavenTestParams());
-  }
+    @Test
+    void testGenerateMavenTestParamsForMultipleTests() {
+        Map<String, Set<String>> classMethodMap = new LinkedHashMap<>();
+        classMethodMap.put(TEST_CLASS_ONE,
+                Sets.newLinkedHashSet(Arrays.asList(TEST_METHOD_ONE, TEST_METHOD_TWO)));
+        classMethodMap.put(TEST_CLASS_TWO, Sets.newHashSet(TEST_METHOD_THREE));
+        testGenerateMavenTestParams(classMethodMap, "classOne#methodOne+methodTwo,classTwo#methodThree",
+                "Wrong test parameters for multiple test classes");
+    }
+
+    private void testGenerateMavenTestParams(Map<String, Set<String>> classMethodMap,
+                                             String expectedTestParam, String errorMsg) {
+        DeflakeAction action = new DeflakeAction(classMethodMap);
+        assertEquals(expectedTestParam,
+                action.generateMavenTestParams(),
+                errorMsg);
+    }
 }

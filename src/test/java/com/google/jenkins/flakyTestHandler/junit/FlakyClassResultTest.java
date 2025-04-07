@@ -14,50 +14,54 @@
  */
 package com.google.jenkins.flakyTestHandler.junit;
 
-import junit.framework.TestCase;
-
 import hudson.tasks.test.TestResult;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test class copied from hudson.tasks.junit.ClassResultTest
- *
+ * <p>
  * https://github.com/jenkinsci/jenkins/blob/master/core/src/test/java/hudson/tasks/junit/
  * ClassResultTest.java
  */
-public class FlakyClassResultTest extends TestCase {
+class FlakyClassResultTest {
 
-  public void testFindCorrespondingResult() {
-    FlakyClassResult flakyClassResult = new FlakyClassResult(null, "com.example.ExampleTest");
+    @Test
+    void testFindCorrespondingResult() {
+        FlakyClassResult flakyClassResult = new FlakyClassResult(null, "com.example.ExampleTest");
 
-    FlakyCaseResult flakyCaseResult = new FlakyCaseResult(null, "testCase", null);
+        FlakyCaseResult flakyCaseResult = new FlakyCaseResult(null, "testCase", null);
 
-    flakyClassResult.add(flakyCaseResult);
+        flakyClassResult.add(flakyCaseResult);
 
-    TestResult result = flakyClassResult
-        .findCorrespondingResult("extraprefix.com.example.ExampleTest.testCase");
-    assertEquals(flakyCaseResult, result);
-  }
+        TestResult result = flakyClassResult
+                .findCorrespondingResult("extraprefix.com.example.ExampleTest.testCase");
+        assertEquals(flakyCaseResult, result);
+    }
 
-  public void testFindCorrespondingResultWhereFlakyClassResultNameIsNotSubstring() {
-    FlakyClassResult FlakyClassResult = new FlakyClassResult(null, "aaaa");
+    @Test
+    void testFindCorrespondingResultWhereFlakyClassResultNameIsNotSubstring() {
+        FlakyClassResult flakyClassResult = new FlakyClassResult(null, "aaaa");
 
-    FlakyCaseResult FlakyCaseResult = new FlakyCaseResult(null, "tc_bbbb", null);
+        FlakyCaseResult flakyCaseResult = new FlakyCaseResult(null, "tc_bbbb", null);
 
-    FlakyClassResult.add(FlakyCaseResult);
+        flakyClassResult.add(flakyCaseResult);
 
-    TestResult result = FlakyClassResult.findCorrespondingResult("tc_bbbb");
-    assertEquals(FlakyCaseResult, result);
-  }
+        TestResult result = flakyClassResult.findCorrespondingResult("tc_bbbb");
+        assertEquals(flakyCaseResult, result);
+    }
 
-  public void testFindCorrespondingResultWhereFlakyClassResultNameIsLastInFlakyCaseResultName() {
-    FlakyClassResult FlakyClassResult = new FlakyClassResult(null, "aaaa");
+    @Test
+    void testFindCorrespondingResultWhereFlakyClassResultNameIsLastInFlakyCaseResultName() {
+        FlakyClassResult flakyClassResult = new FlakyClassResult(null, "aaaa");
 
-    FlakyCaseResult FlakyCaseResult = new FlakyCaseResult(null, "tc_aaaa", null);
+        FlakyCaseResult flakyCaseResult = new FlakyCaseResult(null, "tc_aaaa", null);
 
-    FlakyClassResult.add(FlakyCaseResult);
+        flakyClassResult.add(flakyCaseResult);
 
-    TestResult result = FlakyClassResult.findCorrespondingResult("tc_aaaa");
-    assertEquals(FlakyCaseResult, result);
-  }
+        TestResult result = flakyClassResult.findCorrespondingResult("tc_aaaa");
+        assertEquals(flakyCaseResult, result);
+    }
 
 }

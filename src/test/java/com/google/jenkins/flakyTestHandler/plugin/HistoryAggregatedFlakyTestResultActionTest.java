@@ -14,287 +14,271 @@
  */
 package com.google.jenkins.flakyTestHandler.plugin;
 
-/**
- *
- * Test aggregation logic
- *
- * @author Qingzhou Luo
- */
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction.FlakyRunStats;
 import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResultAction.SingleTestFlakyStats;
 import com.google.jenkins.flakyTestHandler.plugin.HistoryAggregatedFlakyTestResultAction.SingleTestFlakyStatsWithRevision;
 import com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause;
-
+import hudson.model.CauseAction;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Run;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import hudson.model.CauseAction;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HistoryAggregatedFlakyTestResultActionTest {
+@WithJenkins
+class HistoryAggregatedFlakyTestResultActionTest {
 
-  private final static String TEST_ONE = "testOne";
+    private static final String TEST_ONE = "testOne";
 
-  private final static String TEST_TWO = "testTwo";
+    private static final String TEST_TWO = "testTwo";
 
-  private final static String TEST_THREE = "testThree";
+    private static final String TEST_THREE = "testThree";
 
-  private final static String TEST_FOUR = "testFour";
+    private static final String TEST_FOUR = "testFour";
 
-  private final static String REVISION_ONE = "revision_one";
+    private static final String REVISION_ONE = "revision_one";
 
-  private final static String REVISION_TWO = "revision_two";
+    private static final String REVISION_TWO = "revision_two";
 
-  private final static int TOTAL_RUNS = 2;
+    private static final int TOTAL_RUNS = 2;
 
-  @Rule
-  public JenkinsRule jenkins = new JenkinsRule();
+    // Use fields instead of local variables, so that WeakReference to those in FlakyTestResultAction
+    // cannot be garbage collected during the test. Especially important when running test on Windows,
+    // as test execution is much slower there.
+    private FlakyRunStats actionOneResult;
+    private FlakyRunStats actionTwoResult;
+    private FlakyRunStats actionThreeResult;
 
-  // Use fields instead of local variables, so that WeakReference to those in FlakyTestResultAction
-  // cannot be garbage collected during the test. Especially important when running test on Windows,
-  // as test execution is much slower there.
-  FlakyRunStats actionOneResult;
-  FlakyRunStats actionTwoResult;
-  FlakyRunStats actionThreeResult;
+    @Test
+    void testAggregateFlakyRunsWithRevisions(JenkinsRule jenkins) throws Exception {
 
-  @Test
-  public void testAggregateFlakyRunsWithRevisions() throws Exception {
+        FreeStyleProject project = jenkins.createFreeStyleProject("project");
 
-    FreeStyleProject project = jenkins.createFreeStyleProject("project");
+        List<Run> runList = new ArrayList<>();
 
-    List<Run> runList = new ArrayList<>();
+        for (FlakyTestResultAction action : setUpFlakyTestResultAction()) {
+            FreeStyleBuild build = new FreeStyleBuild(project);
+            build.addAction(action);
+            runList.add(build);
+        }
 
-    for (FlakyTestResultAction action : setUpFlakyTestResultAction()) {
-      FreeStyleBuild build = new FreeStyleBuild(project);
-      build.addAction(action);
-      runList.add(build);
+        HistoryAggregatedFlakyTestResultAction action = new HistoryAggregatedFlakyTestResultAction(
+                null);
+
+        for (Run run : runList) {
+            action.aggregateOneBuild(run);
+        }
+
+        Map<String, Map<String, SingleTestFlakyStats>> statsMapOverRevision =
+                action.getAggregatedTestFlakyStatsWithRevision();
+
+        // TEST_ONE
+        SingleTestFlakyStats testOneRevisionOneStats = statsMapOverRevision.get(TEST_ONE)
+                .get(REVISION_ONE);
+        assertEquals(2, testOneRevisionOneStats.getPass(), "wrong number passes");
+        assertEquals(0, testOneRevisionOneStats.getFail(), "wrong number fails");
+        assertEquals(0, testOneRevisionOneStats.getFlake(), "wrong number flakes");
+
+        SingleTestFlakyStats testOneRevisionTwoStats = statsMapOverRevision.get(TEST_ONE)
+                .get(REVISION_TWO);
+        assertEquals(1, testOneRevisionTwoStats.getPass(), "wrong number passes");
+        assertEquals(1, testOneRevisionTwoStats.getFail(), "wrong number fails");
+        assertEquals(0, testOneRevisionTwoStats.getFlake(), "wrong number flakes");
+
+        // TEST_TWO
+        SingleTestFlakyStats testTwoRevisionOneStats = statsMapOverRevision.get(TEST_TWO)
+                .get(REVISION_ONE);
+        assertEquals(1, testTwoRevisionOneStats.getPass(), "wrong number passes");
+        assertEquals(3, testTwoRevisionOneStats.getFail(), "wrong number fails");
+        assertEquals(0, testTwoRevisionOneStats.getFlake(), "wrong number flakes");
+
+        SingleTestFlakyStats testTwoRevisionTwoStats = statsMapOverRevision.get(TEST_TWO)
+                .get(REVISION_TWO);
+        assertEquals(1, testTwoRevisionTwoStats.getPass(), "wrong number passes");
+        assertEquals(0, testTwoRevisionTwoStats.getFail(), "wrong number fails");
+        assertEquals(0, testTwoRevisionTwoStats.getFlake(), "wrong number flakes");
+
+        // TEST_THREE
+        SingleTestFlakyStats testThreeRevisionOneStats = statsMapOverRevision.get(TEST_THREE)
+                .get(REVISION_ONE);
+        assertEquals(1, testThreeRevisionOneStats.getPass(), "wrong number passes");
+        assertEquals(2, testThreeRevisionOneStats.getFail(), "wrong number fails");
+        assertEquals(0, testThreeRevisionOneStats.getFlake(), "wrong number flakes");
+
+        SingleTestFlakyStats testThreeRevisionTwoStats = statsMapOverRevision.get(TEST_THREE)
+                .get(REVISION_TWO);
+        assertEquals(0, testThreeRevisionTwoStats.getPass(), "wrong number passes");
+        assertEquals(2, testThreeRevisionTwoStats.getFail(), "wrong number fails");
+        assertEquals(0, testThreeRevisionTwoStats.getFlake(), "wrong number flakes");
+
+        // TEST_FOUR
+        SingleTestFlakyStats testFourRevisionOneStats = statsMapOverRevision.get(TEST_FOUR)
+                .get(REVISION_ONE);
+        assertEquals(1, testFourRevisionOneStats.getPass(), "wrong number passes");
+        assertEquals(3, testFourRevisionOneStats.getFail(), "wrong number fails");
+        assertEquals(0, testFourRevisionOneStats.getFlake(), "wrong number flakes");
+
+        SingleTestFlakyStats testFourRevisionTwoStats = statsMapOverRevision.get(TEST_FOUR)
+                .get(REVISION_TWO);
+        assertEquals(1, testFourRevisionTwoStats.getPass(), "wrong number passes");
+        assertEquals(0, testFourRevisionTwoStats.getFail(), "wrong number fails");
+        assertEquals(0, testFourRevisionTwoStats.getFlake(), "wrong number flakes");
     }
 
-    HistoryAggregatedFlakyTestResultAction action = new HistoryAggregatedFlakyTestResultAction(
-        null);
+    @Test
+    void testAggregate(JenkinsRule jenkins) throws Exception {
+        FreeStyleProject project = jenkins.createFreeStyleProject("project");
+        List<FlakyTestResultAction> flakyTestResultActions = setUpFlakyTestResultAction();
 
-    for (Run run : runList) {
-      action.aggregateOneBuild(run);
+        List<FlakyTestResultAction> flakyTestResultActionList = new ArrayList<>(
+                flakyTestResultActions);
+
+        // First non-deflake build
+        Run firstBuild = project
+                .scheduleBuild2(0, flakyTestResultActionList.get(0)).get();
+        jenkins.waitForCompletion(firstBuild);
+
+        // Second deflake build
+        Run secondBuild = project
+                .scheduleBuild2(0, flakyTestResultActionList.get(1),
+                        new CauseAction(new DeflakeCause(firstBuild))).get();
+        jenkins.waitForCompletion(secondBuild);
+
+        // Third deflake build with HistoryAggregatedFlakyTestResultAction
+        Run thirdBuild = project
+                .scheduleBuild2(0, flakyTestResultActionList.get(2),
+                        new HistoryAggregatedFlakyTestResultAction(project)).get();
+        jenkins.waitForCompletion(thirdBuild);
+
+        HistoryAggregatedFlakyTestResultAction action = thirdBuild
+                .getAction(HistoryAggregatedFlakyTestResultAction.class);
+        action.aggregate();
+
+        Map<String, SingleTestFlakyStats> aggregatedFlakyStatsMap = action.getAggregatedFlakyStats();
+
+        // Make sure revisions are inserted in the order of their appearance
+        Map<String, SingleTestFlakyStats> revisionMap = action.getAggregatedTestFlakyStatsWithRevision()
+                .get(TEST_ONE);
+        assertArrayEquals(new String[]{REVISION_ONE, REVISION_TWO},
+                revisionMap.keySet().toArray(new String[0]),
+                "Incorrect revision history");
+
+        assertEquals(4, aggregatedFlakyStatsMap.size(), "wrong number of entries for flaky stats");
+
+        SingleTestFlakyStats testOneStats = aggregatedFlakyStatsMap.get(TEST_ONE);
+        SingleTestFlakyStats testTwoStats = aggregatedFlakyStatsMap.get(TEST_TWO);
+        SingleTestFlakyStats testThreeStats = aggregatedFlakyStatsMap.get(TEST_THREE);
+        SingleTestFlakyStats testFourStats = aggregatedFlakyStatsMap.get(TEST_FOUR);
+
+        assertEquals(1, testOneStats.getPass(), "wrong number passes");
+        assertEquals(0, testOneStats.getFail(), "wrong number fails");
+        assertEquals(1, testOneStats.getFlake(), "wrong number flakes");
+
+        assertEquals(1, testTwoStats.getPass(), "wrong number passes");
+        assertEquals(0, testTwoStats.getFail(), "wrong number fails");
+        assertEquals(1, testTwoStats.getFlake(), "wrong number flakes");
+
+        assertEquals(0, testThreeStats.getPass(), "wrong number passes");
+        assertEquals(1, testThreeStats.getFail(), "wrong number fails");
+        assertEquals(1, testThreeStats.getFlake(), "wrong number flakes");
+
+        assertEquals(1, testFourStats.getPass(), "wrong number passes");
+        assertEquals(0, testFourStats.getFail(), "wrong number fails");
+        assertEquals(1, testFourStats.getFlake(), "wrong number flakes");
     }
 
-    Map<String, Map<String, SingleTestFlakyStats>> statsMapOverRevision =
-        action.getAggregatedTestFlakyStatsWithRevision();
 
-    // TEST_ONE
-    SingleTestFlakyStats testOneRevisionOneStats = statsMapOverRevision.get(TEST_ONE)
-        .get(REVISION_ONE);
-    assertEquals("wrong number passes", 2, testOneRevisionOneStats.getPass());
-    assertEquals("wrong number fails", 0, testOneRevisionOneStats.getFail());
-    assertEquals("wrong number flakes", 0, testOneRevisionOneStats.getFlake());
+    private List<FlakyTestResultAction> setUpFlakyTestResultAction() {
+        FlakyTestResultAction actionOne = new FlakyTestResultAction();
+        FlakyTestResultAction actionTwo = new FlakyTestResultAction();
+        FlakyTestResultAction actionThree = new FlakyTestResultAction();
 
-    SingleTestFlakyStats testOneRevisionTwoStats = statsMapOverRevision.get(TEST_ONE)
-        .get(REVISION_TWO);
-    assertEquals("wrong number passes", 1, testOneRevisionTwoStats.getPass());
-    assertEquals("wrong number fails", 1, testOneRevisionTwoStats.getFail());
-    assertEquals("wrong number flakes", 0, testOneRevisionTwoStats.getFlake());
+        Map<String, SingleTestFlakyStatsWithRevision> testFlakyStatsWithRevisionMap =
+                new HashMap<>();
+        testFlakyStatsWithRevisionMap.put(TEST_ONE,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.PASSED));
+        testFlakyStatsWithRevisionMap.put(TEST_TWO,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
+        testFlakyStatsWithRevisionMap.put(TEST_THREE,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.PASSED));
+        testFlakyStatsWithRevisionMap.put(TEST_FOUR,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FLAKED));
 
-    // TEST_TWO
-    SingleTestFlakyStats testTwoRevisionOneStats = statsMapOverRevision.get(TEST_TWO)
-        .get(REVISION_ONE);
-    assertEquals("wrong number passes", 1, testTwoRevisionOneStats.getPass());
-    assertEquals("wrong number fails", 3, testTwoRevisionOneStats.getFail());
-    assertEquals("wrong number flakes", 0, testTwoRevisionOneStats.getFlake());
+        actionOneResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
 
-    SingleTestFlakyStats testTwoRevisionTwoStats = statsMapOverRevision.get(TEST_TWO)
-        .get(REVISION_TWO);
-    assertEquals("wrong number passes", 1, testTwoRevisionTwoStats.getPass());
-    assertEquals("wrong number fails", 0, testTwoRevisionTwoStats.getFail());
-    assertEquals("wrong number flakes", 0, testTwoRevisionTwoStats.getFlake());
+        testFlakyStatsWithRevisionMap = new HashMap<>();
+        testFlakyStatsWithRevisionMap.put(TEST_ONE,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.PASSED));
+        testFlakyStatsWithRevisionMap.put(TEST_TWO,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FLAKED));
+        testFlakyStatsWithRevisionMap.put(TEST_THREE,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
+        testFlakyStatsWithRevisionMap.put(TEST_FOUR,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
 
-    // TEST_THREE
-    SingleTestFlakyStats testThreeRevisionOneStats = statsMapOverRevision.get(TEST_THREE)
-        .get(REVISION_ONE);
-    assertEquals("wrong number passes", 1, testThreeRevisionOneStats.getPass());
-    assertEquals("wrong number fails", 2, testThreeRevisionOneStats.getFail());
-    assertEquals("wrong number flakes", 0, testThreeRevisionOneStats.getFlake());
+        actionTwoResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
 
-    SingleTestFlakyStats testThreeRevisionTwoStats = statsMapOverRevision.get(TEST_THREE)
-        .get(REVISION_TWO);
-    assertEquals("wrong number passes", 0, testThreeRevisionTwoStats.getPass());
-    assertEquals("wrong number fails", 2, testThreeRevisionTwoStats.getFail());
-    assertEquals("wrong number flakes", 0, testThreeRevisionTwoStats.getFlake());
+        testFlakyStatsWithRevisionMap = new HashMap<>();
+        testFlakyStatsWithRevisionMap.put(TEST_ONE,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.FLAKED));
+        testFlakyStatsWithRevisionMap.put(TEST_TWO,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.PASSED));
+        testFlakyStatsWithRevisionMap.put(TEST_THREE,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.FAILED));
+        testFlakyStatsWithRevisionMap.put(TEST_FOUR,
+                createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.PASSED));
 
-    // TEST_FOUR
-    SingleTestFlakyStats testFourRevisionOneStats = statsMapOverRevision.get(TEST_FOUR)
-        .get(REVISION_ONE);
-    assertEquals("wrong number passes", 1, testFourRevisionOneStats.getPass());
-    assertEquals("wrong number fails", 3, testFourRevisionOneStats.getFail());
-    assertEquals("wrong number flakes", 0, testFourRevisionOneStats.getFlake());
+        actionThreeResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
 
-    SingleTestFlakyStats testFourRevisionTwoStats = statsMapOverRevision.get(TEST_FOUR)
-        .get(REVISION_TWO);
-    assertEquals("wrong number passes", 1, testFourRevisionTwoStats.getPass());
-    assertEquals("wrong number fails", 0, testFourRevisionTwoStats.getFail());
-    assertEquals("wrong number flakes", 0, testFourRevisionTwoStats.getFlake());
-  }
+        actionOne.setFlakyRunStats(actionOneResult);
+        actionTwo.setFlakyRunStats(actionTwoResult);
+        actionThree.setFlakyRunStats(actionThreeResult);
 
-  @Test
-  public void testAggregate() throws Exception {
-    FreeStyleProject project = jenkins.createFreeStyleProject("project");
-    List<FlakyTestResultAction> flakyTestResultActions = setUpFlakyTestResultAction();
+        List<FlakyTestResultAction> actionList = new ArrayList<>();
 
-    List<FlakyTestResultAction> flakyTestResultActionList = new ArrayList<FlakyTestResultAction>(
-        flakyTestResultActions);
-
-    // First non-deflake build
-    Run firstBuild = project
-        .scheduleBuild2(0, flakyTestResultActionList.get(0)).get();
-    while (firstBuild.isBuilding()) {
-      Thread.sleep(100);
+        actionList.add(actionOne);
+        actionList.add(actionTwo);
+        actionList.add(actionThree);
+        return actionList;
     }
 
-    // Second deflake build
-    Run secondBuild = project
-        .scheduleBuild2(0, flakyTestResultActionList.get(1),
-            new CauseAction(new DeflakeCause(firstBuild))).get();
-    while (secondBuild.isBuilding()) {
-      Thread.sleep(100);
+    private enum TestState {
+        PASSED, FAILED, FLAKED
     }
 
-    // Third deflake build with HistoryAggregatedFlakyTestResultAction
-    Run thirdBuild = project
-        .scheduleBuild2(0, flakyTestResultActionList.get(2),
-            new HistoryAggregatedFlakyTestResultAction(project)).get();
-    while (thirdBuild.isBuilding()) {
-      Thread.sleep(100);
+    /**
+     * Create a {@link SingleTestFlakyStatsWithRevision} object for testing
+     *
+     * @param totalRuns number of maximal number of potential runs in this bulid. Assume if a test is
+     *                  flaky, it will fail in all previous totalRuns-1 retries but pass in the last time.
+     * @param revision  the revision this build was run
+     * @param result    result of a single test
+     * @return a {@link SingleTestFlakyStatsWithRevision} object which contains the revision
+     * information and the number of passes/fails for the test
+     */
+    private static SingleTestFlakyStatsWithRevision createSingleTestFlakyStatsWithRevision(
+            int totalRuns,
+            String revision, TestState result) {
+
+        SingleTestFlakyStats stats;
+        if (result == TestState.PASSED) {
+            stats = new SingleTestFlakyStats(1, 0, 0);
+        } else if (result == TestState.FAILED) {
+            stats = new SingleTestFlakyStats(0, totalRuns, 0);
+        } else {
+            stats = new SingleTestFlakyStats(1, totalRuns - 1, 0);
+        }
+
+        return new SingleTestFlakyStatsWithRevision(stats, revision);
     }
-
-    HistoryAggregatedFlakyTestResultAction action = thirdBuild
-        .getAction(HistoryAggregatedFlakyTestResultAction.class);
-    action.aggregate();
-
-    Map<String, SingleTestFlakyStats> aggregatedFlakyStatsMap = action.getAggregatedFlakyStats();
-
-    // Make sure revisions are inserted in the order of their appearance
-    Map<String, SingleTestFlakyStats> revisionMap = action.getAggregatedTestFlakyStatsWithRevision()
-        .get(TEST_ONE);
-    assertArrayEquals("Incorrect revision history", new String[]{REVISION_ONE, REVISION_TWO},
-        revisionMap.keySet().toArray(new String[revisionMap.size()]));
-
-    assertEquals("wrong number of entries for flaky stats", 4, aggregatedFlakyStatsMap.size());
-
-    SingleTestFlakyStats testOneStats = aggregatedFlakyStatsMap.get(TEST_ONE);
-    SingleTestFlakyStats testTwoStats = aggregatedFlakyStatsMap.get(TEST_TWO);
-    SingleTestFlakyStats testThreeStats = aggregatedFlakyStatsMap.get(TEST_THREE);
-    SingleTestFlakyStats testFourStats = aggregatedFlakyStatsMap.get(TEST_FOUR);
-
-    assertEquals("wrong number passes", 1, testOneStats.getPass());
-    assertEquals("wrong number fails", 0, testOneStats.getFail());
-    assertEquals("wrong number flakes", 1, testOneStats.getFlake());
-
-    assertEquals("wrong number passes", 1, testTwoStats.getPass());
-    assertEquals("wrong number fails", 0, testTwoStats.getFail());
-    assertEquals("wrong number flakes", 1, testTwoStats.getFlake());
-
-    assertEquals("wrong number passes", 0, testThreeStats.getPass());
-    assertEquals("wrong number fails", 1, testThreeStats.getFail());
-    assertEquals("wrong number flakes", 1, testThreeStats.getFlake());
-
-    assertEquals("wrong number passes", 1, testFourStats.getPass());
-    assertEquals("wrong number fails", 0, testFourStats.getFail());
-    assertEquals("wrong number flakes", 1, testFourStats.getFlake());
-  }
-
-
-  private List<FlakyTestResultAction> setUpFlakyTestResultAction() {
-    FlakyTestResultAction actionOne = new FlakyTestResultAction();
-    FlakyTestResultAction actionTwo = new FlakyTestResultAction();
-    FlakyTestResultAction actionThree = new FlakyTestResultAction();
-
-    Map<String, SingleTestFlakyStatsWithRevision> testFlakyStatsWithRevisionMap =
-        new HashMap<String, SingleTestFlakyStatsWithRevision>();
-    testFlakyStatsWithRevisionMap.put(TEST_ONE,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.PASSED));
-    testFlakyStatsWithRevisionMap.put(TEST_TWO,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
-    testFlakyStatsWithRevisionMap.put(TEST_THREE,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.PASSED));
-    testFlakyStatsWithRevisionMap.put(TEST_FOUR,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FLAKED));
-
-    actionOneResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
-
-    testFlakyStatsWithRevisionMap = new HashMap<String, SingleTestFlakyStatsWithRevision>();
-    testFlakyStatsWithRevisionMap.put(TEST_ONE,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.PASSED));
-    testFlakyStatsWithRevisionMap.put(TEST_TWO,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FLAKED));
-    testFlakyStatsWithRevisionMap.put(TEST_THREE,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
-    testFlakyStatsWithRevisionMap.put(TEST_FOUR,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_ONE, TestState.FAILED));
-
-    actionTwoResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
-
-    testFlakyStatsWithRevisionMap = new HashMap<String, SingleTestFlakyStatsWithRevision>();
-    testFlakyStatsWithRevisionMap.put(TEST_ONE,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.FLAKED));
-    testFlakyStatsWithRevisionMap.put(TEST_TWO,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.PASSED));
-    testFlakyStatsWithRevisionMap.put(TEST_THREE,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.FAILED));
-    testFlakyStatsWithRevisionMap.put(TEST_FOUR,
-        createSingleTestFlakyStatsWithRevision(TOTAL_RUNS, REVISION_TWO, TestState.PASSED));
-
-    actionThreeResult = new FlakyRunStats(testFlakyStatsWithRevisionMap);
-
-    actionOne.setFlakyRunStats(actionOneResult);
-    actionTwo.setFlakyRunStats(actionTwoResult);
-    actionThree.setFlakyRunStats(actionThreeResult);
-
-    List<FlakyTestResultAction> actionList = new ArrayList<FlakyTestResultAction>();
-
-    actionList.add(actionOne);
-    actionList.add(actionTwo);
-    actionList.add(actionThree);
-    return actionList;
-  }
-
-  private static enum TestState {
-    PASSED, FAILED, FLAKED;
-  }
-
-  /**
-   * Create a {@link SingleTestFlakyStatsWithRevision} object for testing
-   *
-   * @param totalRuns number of maximal number of potential runs in this bulid. Assume if a test is
-   * flaky, it will fail in all previous totalRuns-1 retries but pass in the last time.
-   * @param revision the revision this build was run
-   * @param result result of a single test
-   * @return a {@link SingleTestFlakyStatsWithRevision} object which contains the revision
-   * information and the number of passes/fails for the test
-   */
-  private static SingleTestFlakyStatsWithRevision createSingleTestFlakyStatsWithRevision(
-      int totalRuns,
-      String revision, TestState result) {
-
-    SingleTestFlakyStats stats;
-    if (result == TestState.PASSED) {
-      stats = new SingleTestFlakyStats(1, 0, 0);
-    } else if (result == TestState.FAILED) {
-      stats = new SingleTestFlakyStats(0, totalRuns, 0);
-    } else {
-      stats = new SingleTestFlakyStats(1, totalRuns - 1, 0);
-    }
-
-    return new SingleTestFlakyStatsWithRevision(stats, revision);
-  }
 
 }
