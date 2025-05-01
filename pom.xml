@@ -21,7 +21,7 @@ limitations under the License.
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>5.7</version>
+    <version>5.12</version>
     <relativePath />
   </parent>
 
