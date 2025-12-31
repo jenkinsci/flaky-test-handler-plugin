@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction.FlakyRunStats;
 import com.google.jenkins.flakyTestHandler.plugin.deflake.DeflakeCause;
 
+import jakarta.annotation.Nonnull;
 import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.StaplerResponse2;
 
@@ -34,7 +35,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import javax.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jenkins.triggers.SCMTriggerItem;
 import hudson.model.AbstractProject;

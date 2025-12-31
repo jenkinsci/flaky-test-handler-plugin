@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 
 import com.google.jenkins.flakyTestHandler.plugin.JUnitFlakyTestDataAction;
 
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.FileUtils;
 import org.dom4j.Element;
 import org.jvnet.localizer.Localizable;
@@ -36,8 +37,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
 
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.Messages;
