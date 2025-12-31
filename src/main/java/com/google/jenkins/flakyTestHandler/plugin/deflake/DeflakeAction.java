@@ -20,6 +20,7 @@ import com.google.common.collect.Iterables;
 import com.google.jenkins.flakyTestHandler.plugin.FlakyTestResultAction;
 
 import hudson.model.*;
+import jakarta.annotation.Nonnull;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -34,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 
 import jenkins.model.Jenkins;
