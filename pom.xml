@@ -82,7 +82,7 @@ limitations under the License.
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>5829.v04f53fa_f8705</version>
+        <version>5804.v80587a_38d937</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
