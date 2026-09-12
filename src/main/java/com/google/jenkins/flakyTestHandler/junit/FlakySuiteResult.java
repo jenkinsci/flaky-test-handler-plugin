@@ -203,8 +203,8 @@ public final class FlakySuiteResult implements Serializable {
       }
     }
 
-    this.stdout = stdout;
-    this.stderr = stderr;
+    this.stdout = FlakyCaseResult.fixNULs(stdout);
+    this.stderr = FlakyCaseResult.fixNULs(stderr);
   }
 
   /*package*/ void addCase(FlakyCaseResult cr) {

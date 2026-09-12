@@ -130,6 +130,12 @@ public class FlakyCaseResult extends TestResult implements Comparable<FlakyCaseR
   }
 
   private static final int HALF_MAX_SIZE = 500;
+
+  // JENKINS-75519 mirror CaseResult from Jenkins' junit plugin
+  static String fixNULs(String stdio) {
+    return stdio == null ? null : stdio.replace("\u0000", "^@");
+  }
+
   static String possiblyTrimStdio(Collection<FlakyCaseResult> results, boolean keepLongStdio, String stdio) { // HUDSON-6516
     if (stdio == null) {
       return null;

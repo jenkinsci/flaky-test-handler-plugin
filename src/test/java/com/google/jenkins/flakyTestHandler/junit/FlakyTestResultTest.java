@@ -19,17 +19,23 @@ import hudson.XmlFile;
 import hudson.util.HeapSpaceStringConverter;
 import hudson.util.XStream2;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.Issue;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the JUnit result XML file parsing in {@link hudson.tasks.junit.TestResult}.
@@ -158,6 +164,96 @@ class FlakyTestResultTest {
         assertEquals(3, testResult.getPassCount(), "Wrong number of passing test cases");
         assertEquals(1, testResult.getFailCount(), "Wrong number of failing test cases");
         assertEquals(1, testResult.getFlakyTests().size(), "Wrong number of flaky test cases");
+    }
+
+    /**
+     * Maven Surefire with {@code maven.test.redirectTestOutputToFile=true} writes stdout to a
+     * sibling {@code *-output.txt} rather than {@code <system-out>} in the XML. A NUL byte in that
+     * sidecar is legal in a text file, but XStream refuses it when persisting {@code FlakySuiteResult#stdout}
+     * (the pipeline {@code junitPublisher} save path).
+     *
+     * <p>This only shows up on multi-module builds because each module has its own
+     * {@code target/surefire-reports} directory; a single NUL in one module is enough to fail
+     * archiving the aggregated result.
+     */
+    @Issue("JENKINS-75519")
+    @Test
+    void testNulInSurefireOutputFileOfMultiModuleProjectFailsXmlSerialization(@TempDir Path workspace)
+            throws Exception {
+        Path moduleAReports = workspace.resolve("module-a/target/surefire-reports");
+        Path moduleBReports = workspace.resolve("module-b/target/surefire-reports");
+        writeSurefireReport(moduleAReports, "com.example.ModuleATest", "module A stdout\n", true);
+        writeSurefireReport(moduleBReports, "com.example.ModuleBTest",
+                "module B stdout with NUL: \0 here\n", true);
+
+        FlakyTestResult testResult = new FlakyTestResult();
+        testResult.parse(moduleAReports.resolve("TEST-com.example.ModuleATest.xml").toFile());
+        testResult.parse(moduleBReports.resolve("TEST-com.example.ModuleBTest.xml").toFile());
+        testResult.tally();
+
+        assertEquals(2, testResult.getSuites().size(), "Wrong number of testsuites");
+        FlakySuiteResult moduleB = testResult.getSuite("com.example.ModuleBTest");
+        assertNotNull(moduleB);
+        assertTrue(moduleB.getStdout().contains("^@"),
+                "Surefire sidecar stdout should reencode the NUL character");
+
+        File dest = workspace.resolve("flaky-result.xml").toFile();
+        XmlFile xmlFile = new XmlFile(XSTREAM, dest);
+        assertDoesNotThrow(() -> xmlFile.write(testResult));
+    }
+
+    /**
+     * Same setup as {@link #testNulInSurefireOutputFileOfMultiModuleProjectFailsXmlSerialization}
+     * except {@code maven.test.redirectTestOutputToFile=false}: Surefire writes console output into
+     * {@code <system-out>} in the XML report instead of a sibling {@code *-output.txt}.
+     */
+    @Issue("JENKINS-75519")
+    @Test
+    void testNulInSurefireSystemOutOfMultiModuleProjectFailsXmlSerialization(@TempDir Path workspace)
+            throws Exception {
+        Path moduleAReports = workspace.resolve("module-a/target/surefire-reports");
+        Path moduleBReports = workspace.resolve("module-b/target/surefire-reports");
+        writeSurefireReport(moduleAReports, "com.example.ModuleATest", "module A stdout\n", false);
+        // any NUL in stdout is encoded as &x0; by PrettyPrintWriter
+        writeSurefireReport(moduleBReports, "com.example.ModuleBTest",
+                "module B stdout with NUL: &x0; here\n", false);
+
+        FlakyTestResult testResult = new FlakyTestResult();
+        testResult.parse(moduleAReports.resolve("TEST-com.example.ModuleATest.xml").toFile());
+        testResult.parse(moduleBReports.resolve("TEST-com.example.ModuleBTest.xml").toFile());
+        testResult.tally();
+
+        assertEquals(2, testResult.getSuites().size(), "Wrong number of testsuites");
+        FlakySuiteResult moduleB = testResult.getSuite("com.example.ModuleBTest");
+        assertNotNull(moduleB);
+        assertTrue(moduleB.getStdout().contains("&x0;"),
+                "Embedded <system-out> stdout should retain the xml encoded NUL character");
+
+        File dest = workspace.resolve("flaky-result.xml").toFile();
+        XmlFile xmlFile = new XmlFile(XSTREAM, dest);
+        assertDoesNotThrow(() -> xmlFile.write(testResult));
+    }
+
+    /**
+     * @param redirectTestOutputToFile {@code true} mimics Surefire
+     * {@code maven.test.redirectTestOutputToFile=true} (stdout in {@code *-output.txt});
+     * {@code false} puts stdout in {@code <system-out>} in the XML.
+     */
+    private static void writeSurefireReport(Path reportsDir, String className, String stdout,
+            boolean redirectTestOutputToFile) throws IOException {
+        Files.createDirectories(reportsDir);
+        StringBuilder report = new StringBuilder();
+        report.append("<testsuite failures='0' errors='0' tests='1' name='").append(className).append("'>\n");
+        report.append("<testcase name='testSomething' classname='").append(className).append("'/>\n");
+        if (!redirectTestOutputToFile) {
+            report.append("<system-out><![CDATA[").append(stdout).append("]]></system-out>\n");
+        }
+        report.append("</testsuite>\n");
+        Files.writeString(reportsDir.resolve("TEST-" + className + ".xml"), report.toString(),
+                StandardCharsets.UTF_8);
+        if (redirectTestOutputToFile) {
+            Files.writeString(reportsDir.resolve(className + "-output.txt"), stdout, StandardCharsets.UTF_8);
+        }
     }
 
     private static final XStream XSTREAM = new XStream2();
